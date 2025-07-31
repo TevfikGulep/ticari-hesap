@@ -1,15 +1,18 @@
 // =================================================================
-// DOSYA: src/App.js
-// AÇIKLAMA: Ana uygulama component'i. Diğer tüm component'leri
-// bir araya getirir, state yönetimini ve menü mantığını içerir.
+// DOSYA: src/App.js (GÜNCELLENDİ)
+// AÇIKLAMA: Firebase ve Auth component'i entegre edildi.
+// Kullanıcı oturum durumu yönetiliyor.
 // =================================================================
 import React, { useState, useEffect } from 'react';
 
-// Stil fonksiyonunu import et
-import getStyles from './styles/getStyles';
+// Firebase ve Auth imports
+import app from './firebaseConfig'; // Firebase'i başlatmak için
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-// Component'leri import et
+// Stil ve Component imports
+import getStyles from './styles/getStyles';
 import { MenuIcon, CloseIcon } from './components/Icons';
+import Auth from './components/Auth';
 import ProfitCalculator from './components/ProfitCalculator';
 import SalesPriceCalculator from './components/SalesPriceCalculator';
 import MarketplaceCalculator from './components/MarketplaceCalculator';
@@ -20,6 +23,17 @@ const App = () => {
   const [activeView, setActiveView] = useState('profitCalculator');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState('light');
+  const [user, setUser] = useState(null); // Kullanıcı state'i
+
+  // Firebase auth state dinleyicisi
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    // Component unmount olduğunda dinleyiciyi kaldır
+    return () => unsubscribe();
+  }, []);
 
   // Cihazın renk şemasına göre tema belirle
   useEffect(() => {
@@ -46,7 +60,6 @@ const App = () => {
     setIsMenuOpen(false);
   };
   
-  // Aktif olan hesaplayıcıyı render et
   const renderActiveView = () => {
     switch(activeView) {
       case 'profitCalculator':
@@ -89,10 +102,13 @@ const App = () => {
       </div>
       
       <div style={styles.header}>
-        <button style={styles.menuButton} onClick={() => setIsMenuOpen(true)}>
-          <MenuIcon style={styles.menuIcon} />
-        </button>
-        <h1 style={styles.headerTitle}>Ticari Hesaplayıcı</h1>
+        <div style={styles.headerLeft}>
+            <button style={styles.menuButton} onClick={() => setIsMenuOpen(true)}>
+              <MenuIcon style={styles.menuIcon} />
+            </button>
+            <h1 style={styles.headerTitle}>Ticari Hesaplayıcı</h1>
+        </div>
+        <Auth user={user} styles={styles} />
       </div>
       
       <div style={styles.container}>
