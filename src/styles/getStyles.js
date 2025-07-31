@@ -1,7 +1,7 @@
 // =================================================================
 // DOSYA: src/styles/getStyles.js
-// AÇIKLAMA: Tema (açık/koyu mod) ve genel stil tanımlamalarını
-// içeren fonksiyondur. Stil mantığını component'lerden ayırır.
+// AÇIKLAMA: Tema ve stil tanımlamalarını içerir. Auth component'i
+// için yeni stiller eklendi.
 // =================================================================
 const getStyles = (theme) => {
   const isLight = theme === 'light';
@@ -23,13 +23,16 @@ const getStyles = (theme) => {
     toggleBorder: isLight ? '#d1d5db' : '#4b5563',
     toggleActiveBg: isLight ? '#3b82f6' : '#3b82f6',
     toggleText: isLight ? '#374151' : '#d1d5db',
+    authButtonBg: isLight ? '#4285F4' : '#4285F4',
+    authButtonText: '#ffffff',
   };
 
   return {
     safeArea: { flex: 1, backgroundColor: colors.background, fontFamily: 'sans-serif', minHeight: '100vh', position: 'relative', overflowX: 'hidden' },
     container: { padding: 20, maxWidth: '800px', margin: 'auto', paddingTop: '80px' },
-    header: { position: 'fixed', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', padding: '0 20px', height: '60px', backgroundColor: colors.card, boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.05 : 0.2})`, zIndex: 1000 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text, textAlign: 'center', flex: 1 },
+    header: { position: 'fixed', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: '60px', backgroundColor: colors.card, boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.05 : 0.2})`, zIndex: 1000 },
+    headerLeft: { display: 'flex', alignItems: 'center' },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginLeft: '10px' },
     menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '10px' },
     menuIcon: { color: colors.icon },
     overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1001 },
@@ -57,6 +60,13 @@ const getStyles = (theme) => {
     tdHighlighted: { padding: '8px', border: `1px solid ${colors.inputBorder}`, textAlign: 'right', fontWeight: 'bold', color: colors.navActiveText },
     tfootTr: { backgroundColor: colors.resultBg, borderTop: `2px solid ${colors.inputBorder}` },
     tfootTd: { padding: '10px 8px', border: `1px solid ${colors.inputBorder}`, textAlign: 'right', color: colors.text },
+    // --- Auth Styles ---
+    authContainer: { display: 'flex', alignItems: 'center' },
+    profileImage: { width: '32px', height: '32px', borderRadius: '50%', marginRight: '10px' },
+    userName: { color: colors.text, fontWeight: '500', marginRight: '15px', fontSize: '14px' },
+    authButton: { backgroundColor: 'transparent', color: colors.label, border: `1px solid ${colors.toggleBorder}`, borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
+    signInButton: { display: 'flex', alignItems: 'center', backgroundColor: colors.authButtonBg, color: colors.authButtonText, border: 'none' },
+    googleIcon: { width: '18px', height: '18px', marginRight: '10px' },
   };
 };
 
