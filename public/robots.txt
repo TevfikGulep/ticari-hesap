@@ -1,0 +1,8 @@
+# =================================================================
+# DOSYA: public/robots.txt
+# AÇIKLAMA: Arama motoru botlarına sitenizin hangi kısımlarını
+# tarayabileceklerini veya tarayamayacaklarını söyler.
+# =================================================================
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow:
