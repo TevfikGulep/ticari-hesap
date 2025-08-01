@@ -48,99 +48,101 @@ const SalaryCalculator = ({ styles }) => {
         { limit: Infinity, rate: 0.40 },
       ];
 
-      const calculateIncomeTax = (matrah, kumulatif) => {
-        let tax = 0;
-        let previousLimit = 0;
-        for (const dilim of VERGI_DILIMLERI) {
-            if (kumulatif + matrah > previousLimit) {
-                const taxableInDilim = Math.min(kumulatif + matrah, dilim.limit) - Math.max(kumulatif, previousLimit);
-                if (taxableInDilim > 0) {
-                    tax += taxableInDilim * dilim.rate;
-                }
-            }
-            previousLimit = dilim.limit;
-        }
-        return tax;
+      const getTotalTaxForCumulative = (cumulativeBase) => {
+          if (cumulativeBase <= 0) return 0;
+          let totalTax = 0;
+          let previousLimit = 0;
+          for (const bracket of VERGI_DILIMLERI) {
+              if (cumulativeBase > previousLimit) {
+                  const taxableInBracket = Math.min(cumulativeBase, bracket.limit) - previousLimit;
+                  totalTax += taxableInBracket * bracket.rate;
+              }
+              previousLimit = bracket.limit;
+          }
+          return totalTax;
       };
-      
+
+      const calculateIncomeTaxForMonth = (currentMonthBase, cumulativeBaseBeforeMonth) => {
+          if (currentMonthBase <= 0) return 0;
+          const totalTaxAfterMonth = getTotalTaxForCumulative(cumulativeBaseBeforeMonth + currentMonthBase);
+          const totalTaxBeforeMonth = getTotalTaxForCumulative(cumulativeBaseBeforeMonth);
+          return totalTaxAfterMonth - totalTaxBeforeMonth;
+      };
+
+      const calculateNetFromGross = (gross, kumulatif, asgariUcretKumulatif) => {
+        const sgkIsciPayi = Math.min(gross, SGK_TAVAN) * 0.14;
+        const issizlikIsciPayi = Math.min(gross, SGK_TAVAN) * 0.01;
+        const gelirVergisiMatrahi = gross - sgkIsciPayi - issizlikIsciPayi;
+        const asgariUcretGvMatrahi = ASGARI_UCRET_BRUT - (ASGARI_UCRET_BRUT * 0.14) - (ASGARI_UCRET_BRUT * 0.01);
+        const gelirVergisiIstisnasi = calculateIncomeTaxForMonth(asgariUcretGvMatrahi, asgariUcretKumulatif);
+        const damgaVergisiIstisnasi = ASGARI_UCRET_BRUT * 0.00759;
+        const engellilikIndirimiTutari = ENGELLILIK_INDIRIMI[engellilikDurumu];
+        const indirimliMatrah = Math.max(0, gelirVergisiMatrahi - engellilikIndirimiTutari);
+        const hesaplananGelirVergisi = calculateIncomeTaxForMonth(indirimliMatrah, kumulatif);
+        const nihaiGelirVergisi = Math.max(0, hesaplananGelirVergisi - gelirVergisiIstisnasi);
+        const hesaplananDamgaVergisi = gross * 0.00759;
+        const nihaiDamgaVergisi = Math.max(0, hesaplananDamgaVergisi - damgaVergisiIstisnasi);
+        const toplamKesinti = sgkIsciPayi + issizlikIsciPayi + nihaiGelirVergisi + nihaiDamgaVergisi;
+        return gross - toplamKesinti;
+      };
+
       const calculateGrossFromNet = (targetNet, kumulatif, asgariUcretKumulatif) => {
-        let guessBrut = targetNet * 1.4; 
-        
-        for(let iter = 0; iter < 30; iter++) {
-            const sgkIsciPayi = Math.min(guessBrut, SGK_TAVAN) * 0.14;
-            const issizlikIsciPayi = Math.min(guessBrut, SGK_TAVAN) * 0.01;
-            const gelirVergisiMatrahi = guessBrut - sgkIsciPayi - issizlikIsciPayi;
-
-            const asgariUcretGvMatrahi = ASGARI_UCRET_BRUT - (ASGARI_UCRET_BRUT * 0.14) - (ASGARI_UCRET_BRUT * 0.01);
-            const gelirVergisiIstisnasi = calculateIncomeTax(asgariUcretGvMatrahi, asgariUcretKumulatif);
-            const damgaVergisiIstisnasi = ASGARI_UCRET_BRUT * 0.00759;
-
-            const engellilikIndirimiTutari = ENGELLILIK_INDIRIMI[engellilikDurumu];
-            const indirimliMatrah = Math.max(0, gelirVergisiMatrahi - engellilikIndirimiTutari);
-
-            const hesaplananGelirVergisi = calculateIncomeTax(indirimliMatrah, kumulatif);
-            const nihaiGelirVergisi = Math.max(0, hesaplananGelirVergisi - gelirVergisiIstisnasi);
-            const hesaplananDamgaVergisi = guessBrut * 0.00759;
-            const nihaiDamgaVergisi = Math.max(0, hesaplananDamgaVergisi - damgaVergisiIstisnasi);
-            const toplamKesinti = sgkIsciPayi + issizlikIsciPayi + nihaiGelirVergisi + nihaiDamgaVergisi;
-            const currentNet = guessBrut - toplamKesinti;
-
-            if (Math.abs(currentNet - targetNet) < 0.01) {
-                break;
-            }
-            guessBrut = guessBrut * (targetNet / currentNet);
-        }
-        return guessBrut;
+          let low = targetNet;
+          let high = targetNet * 2.5;
+          let guessBrut = 0;
+          for (let i = 0; i < 50; i++) {
+              guessBrut = (low + high) / 2;
+              const currentNet = calculateNetFromGross(guessBrut, kumulatif, asgariUcretKumulatif);
+              if (Math.abs(currentNet - targetNet) < 0.001) {
+                  return guessBrut;
+              }
+              if (currentNet > targetNet) {
+                  high = guessBrut;
+              } else {
+                  low = guessBrut;
+              }
+          }
+          return guessBrut;
       };
 
-      let kumulatif = 0;
-      let asgariUcretKumulatif = 0;
+      let kumulatifGvMatrahi = 0;
+      let asgariUcretKumulatifGvMatrahi = 0;
       const breakdown = [];
-      
-      let initialBrut = pSalaryInput;
-      if (calculationType === 'netToGross') {
-          initialBrut = calculateGrossFromNet(pSalaryInput, 0, 0);
-      }
+      let brutUcret = pSalaryInput;
 
       for (let i = 0; i < 12; i++) {
-        let brutUcret = initialBrut;
-        if(calculationType === 'netToGross'){
-          brutUcret = calculateGrossFromNet(pSalaryInput, kumulatif, asgariUcretKumulatif);
+        if (calculationType === 'netToGross') {
+            brutUcret = calculateGrossFromNet(pSalaryInput, kumulatifGvMatrahi, asgariUcretKumulatifGvMatrahi);
         }
 
         const sgkIsciPayi = Math.min(brutUcret, SGK_TAVAN) * 0.14;
         const issizlikIsciPayi = Math.min(brutUcret, SGK_TAVAN) * 0.01;
         const gelirVergisiMatrahi = brutUcret - sgkIsciPayi - issizlikIsciPayi;
-        
         const asgariUcretGvMatrahi = ASGARI_UCRET_BRUT - (ASGARI_UCRET_BRUT * 0.14) - (ASGARI_UCRET_BRUT * 0.01);
-        const gelirVergisiIstisnasi = calculateIncomeTax(asgariUcretGvMatrahi, asgariUcretKumulatif);
+        const gelirVergisiIstisnasi = calculateIncomeTaxForMonth(asgariUcretGvMatrahi, asgariUcretKumulatifGvMatrahi);
         const damgaVergisiIstisnasi = ASGARI_UCRET_BRUT * 0.00759;
-
         const engellilikIndirimiTutari = ENGELLILIK_INDIRIMI[engellilikDurumu];
         const indirimliMatrah = Math.max(0, gelirVergisiMatrahi - engellilikIndirimiTutari);
-        
-        const hesaplananGelirVergisi = calculateIncomeTax(indirimliMatrah, kumulatif);
+        const hesaplananGelirVergisi = calculateIncomeTaxForMonth(indirimliMatrah, kumulatifGvMatrahi);
         const nihaiGelirVergisi = Math.max(0, hesaplananGelirVergisi - gelirVergisiIstisnasi);
-        
         const hesaplananDamgaVergisi = brutUcret * 0.00759;
         const nihaiDamgaVergisi = Math.max(0, hesaplananDamgaVergisi - damgaVergisiIstisnasi);
-        
         const toplamKesinti = sgkIsciPayi + issizlikIsciPayi + nihaiGelirVergisi + nihaiDamgaVergisi;
-        
         const nihaiNetUcret = brutUcret - toplamKesinti;
-        
-        const sgkIsverenPayi = Math.min(brutUcret, SGK_TAVAN) * 0.155; // 5 puan indirimli
+        const sgkIsverenPayi = Math.min(brutUcret, SGK_TAVAN) * 0.155;
         const issizlikIsverenPayi = Math.min(brutUcret, SGK_TAVAN) * 0.02;
         const isvereneMaliyet = brutUcret + sgkIsverenPayi + issizlikIsverenPayi;
 
-        kumulatif += indirimliMatrah;
-        asgariUcretKumulatif += asgariUcretGvMatrahi;
-        
+        const ayinKumulatifGvMatrahi = kumulatifGvMatrahi + indirimliMatrah;
+
         breakdown.push({
           month: i + 1, brut: brutUcret, sgk: sgkIsciPayi, issizlik: issizlikIsciPayi,
           gelirVergisi: nihaiGelirVergisi, damgaVergisi: nihaiDamgaVergisi,
-          kesinti: toplamKesinti, net: nihaiNetUcret, kumulatif, isvereneMaliyet
+          kesinti: toplamKesinti, net: nihaiNetUcret, kumulatif: ayinKumulatifGvMatrahi, isvereneMaliyet
         });
+
+        kumulatifGvMatrahi += indirimliMatrah;
+        asgariUcretKumulatifGvMatrahi += asgariUcretGvMatrahi;
       }
       setMonthlyBreakdown(breakdown);
 
@@ -166,7 +168,7 @@ const SalaryCalculator = ({ styles }) => {
       </div>
 
       <p style={styles.label}>{calculationType === 'grossToNet' ? 'Brüt Ücret' : 'Net Ücret'}</p>
-      <input style={styles.input} type="text" placeholder={calculationType === 'grossToNet' ? 'Örn: 100.000' : 'Örn: 75.000'} value={salaryInput} onChange={handleInputChange} />
+      <input style={styles.input} type="text" placeholder={calculationType === 'grossToNet' ? 'Örn: 40.000' : 'Örn: 30.000'} value={salaryInput} onChange={handleInputChange} />
       
       <p style={styles.label}>Engellilik Durumu</p>
       <select style={styles.input} value={engellilikDurumu} onChange={(e) => setEngellilikDurumu(e.target.value)}>
