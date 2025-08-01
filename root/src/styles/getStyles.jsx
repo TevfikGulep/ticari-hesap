@@ -45,10 +45,10 @@ const getStyles = (theme) => {
     cardTitle: { fontSize: 20, fontWeight: '600', color: colors.cardTitle, marginBottom: 16 },
     label: { fontSize: 14, color: colors.label, marginBottom: 8 },
     input: { backgroundColor: colors.inputBg, borderRadius: 8, padding: '12px 16px', fontSize: 16, color: colors.inputText, marginBottom: 16, border: `1px solid ${colors.inputBorder}`, width: '100%', boxSizing: 'border-box' },
-    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginTop: 8, margin: 'auto' },
+    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginTop: 8, marginBottom: '8px', margin: 'auto' },
     resultLabel: { fontSize: 16, color: colors.resultLabel },
     resultValue: { fontSize: 20, fontWeight: 'bold', color: colors.text },
-    highlightedResult: { backgroundColor: isLight ? '#e6f7ff' : '#032f4a', border: `1px solid ${isLight ? '#91d5ff' : '#054569'}` },
+    highlightedResult: { backgroundColor: isLight ? '#e6f7ff' : '#032f4a', border: `1px solid ${isLight ? '#91d5ff' : '#054569'}`, marginBottom: '8px' },
     highlightedResultLabel: { fontSize: 16, color: isLight ? '#0050b3' : '#91d5ff', fontWeight: '500' },
     highlightedResultValue: { fontSize: 20, fontWeight: 'bold', color: isLight ? '#0050b3' : '#91d5ff' },
     toggleContainer: { display: 'flex', border: `1px solid ${colors.toggleBorder}`, borderRadius: '8px', marginBottom: '16px' },
@@ -61,11 +61,49 @@ const getStyles = (theme) => {
     tfootTr: { backgroundColor: colors.resultBg, borderTop: `2px solid ${colors.inputBorder}` },
     tfootTd: { padding: '10px 8px', border: `1px solid ${colors.inputBorder}`, textAlign: 'right', color: colors.text },
     // --- Auth Styles ---
-    authContainer: { display: 'flex', alignItems: 'center' },
-    profileImage: { width: '32px', height: '32px', borderRadius: '50%', marginRight: '10px' },
-    userName: { color: colors.text, fontWeight: '500', marginRight: '15px', fontSize: '14px' },
-    authButton: { backgroundColor: 'transparent', color: colors.label, border: `1px solid ${colors.toggleBorder}`, borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
-    signInButton: { display: 'flex', alignItems: 'center', backgroundColor: colors.authButtonBg, color: colors.authButtonText, border: 'none' },
+    authContainer: { display: 'flex', alignItems: 'center', gap: '10px' },
+    profileButton: { 
+        display: 'flex', 
+        alignItems: 'center', 
+        background: colors.inputBg, 
+        border: `1px solid ${colors.inputBorder}`, 
+        padding: '6px 12px', 
+        borderRadius: '9999px', // Tamamen yuvarlak kenarlar için
+        cursor: 'pointer',
+        boxShadow: `0 1px 3px rgba(0, 0, 0, ${isLight ? 0.1 : 0.4})`,
+        transition: 'background-color 0.2s, box-shadow 0.2s',
+        '&:hover': { 
+            backgroundColor: colors.menuItemHover,
+            boxShadow: `0 2px 8px rgba(0, 0, 0, ${isLight ? 0.15 : 0.5})`,
+        } 
+    },
+    profileImage: { width: '28px', height: '28px', borderRadius: '50%' },
+    userName: { color: colors.text, fontWeight: '500', fontSize: '14px', marginLeft: '8px', marginRight: '4px' },
+    signOutButton: { 
+        backgroundColor: 'transparent', 
+        color: colors.label, 
+        border: 'none',
+        borderRadius: '6px', 
+        padding: '8px 12px', 
+        cursor: 'pointer', 
+        fontSize: '14px', 
+        fontWeight: '500',
+        '&:hover': { 
+            color: colors.text,
+            backgroundColor: colors.menuItemHover 
+        } 
+    },
+    signInButton: { 
+        display: 'flex', 
+        alignItems: 'center', 
+        backgroundColor: colors.authButtonBg, 
+        color: colors.authButtonText, 
+        border: 'none', 
+        borderRadius: '6px', 
+        padding: '8px 16px', 
+        fontSize: '14px', 
+        fontWeight: '500' 
+    },
     googleIcon: { width: '18px', height: '18px', marginRight: '10px' },
   };
 };

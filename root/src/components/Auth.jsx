@@ -1,6 +1,7 @@
 // =================================================================
 // DOSYA: src/components/Auth.js
 // AÇIKLAMA: Kullanıcı giriş/çıkış işlemlerini yönetir.
+// onProfileClick prop'u eklendi. Stil güncellendi.
 // =================================================================
 import React from 'react';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
@@ -15,7 +16,7 @@ const GoogleIcon = ({ style }) => (
   </svg>
 );
 
-const Auth = ({ user, styles }) => {
+const Auth = ({ user, styles, onProfileClick }) => {
   const auth = getAuth();
 
   const handleSignIn = () => {
@@ -37,15 +38,25 @@ const Auth = ({ user, styles }) => {
   if (user) {
     return (
       <div style={styles.authContainer}>
-        <img src={user.photoURL} alt={user.displayName} style={styles.profileImage} />
-        <span style={styles.userName}>{user.displayName.split(' ')[0]}</span>
-        <button onClick={handleSignOut} style={styles.authButton}>Çıkış Yap</button>
+        <button style={styles.profileButton} onClick={onProfileClick}>
+            <img src={user.photoURL} alt={user.displayName} style={styles.profileImage} />
+            <span style={styles.userName}>{user.displayName.split(' ')[0]}</span>
+        </button>
+        <button 
+            onClick={(e) => {
+                e.stopPropagation(); 
+                handleSignOut();
+            }} 
+            style={styles.signOutButton}
+        >
+            Çıkış Yap
+        </button>
       </div>
     );
   }
 
   return (
-    <button onClick={handleSignIn} style={{...styles.authButton, ...styles.signInButton}}>
+    <button onClick={handleSignIn} style={styles.signInButton}>
       <GoogleIcon style={styles.googleIcon} />
       Giriş Yap
     </button>

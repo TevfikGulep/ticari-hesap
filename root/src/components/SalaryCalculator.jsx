@@ -4,14 +4,18 @@
 // *** GÜNCELLENDİ: Parametreler 2025 yılı resmi verileriyle ve
 // sağlanan Excel mantığına göre güncellendi. ***
 // =================================================================
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 
-const SalaryCalculator = ({ styles }) => {
+const SalaryCalculator = ({ styles, user, calculation, history }) => {
   const [calculationType, setCalculationType] = useState('grossToNet');
   const [salaryInput, setSalaryInput] = useState('');
   const [engellilikDurumu, setEngellilikDurumu] = useState('yok');
   const [monthlyBreakdown, setMonthlyBreakdown] = useState([]);
   const [yearlyTotals, setYearlyTotals] = useState(null);
+
+  const db = getFirestore();
+  const timeoutRef = useRef(null);
 
   const formatLocale = (number) => {
     if (typeof number !== 'number') return '0,00';
@@ -28,6 +32,15 @@ const SalaryCalculator = ({ styles }) => {
       setSalaryInput(formattedValue);
     }
   };
+
+  useEffect(() => {
+    if (calculation && calculation.type === 'salary') {
+        const { inputs } = calculation;
+        setCalculationType(inputs.calculationType || 'grossToNet');
+        setSalaryInput(inputs.salaryInput || '');
+        setEngellilikDurumu(inputs.engellilikDurumu || 'yok');
+    }
+  }, [calculation]);
 
   useEffect(() => {
     const calculate = () => {
@@ -136,9 +149,9 @@ const SalaryCalculator = ({ styles }) => {
         const ayinKumulatifGvMatrahi = kumulatifGvMatrahi + indirimliMatrah;
 
         breakdown.push({
-          month: i + 1, brut: brutUcret, sgk: sgkIsciPayi, issizlik: issizlikIsciPayi,
+          month: i + 1, brut: brutUcret, net: nihaiNetUcret, sgk: sgkIsciPayi, issizlik: issizlikIsciPayi,
           gelirVergisi: nihaiGelirVergisi, damgaVergisi: nihaiDamgaVergisi,
-          kesinti: toplamKesinti, net: nihaiNetUcret, kumulatif: ayinKumulatifGvMatrahi, isvereneMaliyet
+          kesinti: toplamKesinti, kumulatif: ayinKumulatifGvMatrahi, isvereneMaliyet
         });
 
         kumulatifGvMatrahi += indirimliMatrah;
@@ -154,8 +167,49 @@ const SalaryCalculator = ({ styles }) => {
       }, { brut: 0, net: 0, sgk: 0, issizlik: 0, gelirVergisi: 0, damgaVergisi: 0, isvereneMaliyet: 0 });
       setYearlyTotals(totals);
     };
+
     calculate();
+
   }, [salaryInput, calculationType, engellilikDurumu]);
+
+  // Firestore'a kaydetme
+  useEffect(() => {
+    if (user) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(async () => {
+            const pSalaryInput = parseFloat(salaryInput.replace(/\./g, '').replace(',', '.')) || 0;
+            if (pSalaryInput > 0) {
+                const currentInputs = {
+                    calculationType,
+                    salaryInput,
+                    engellilikDurumu,
+                };
+
+                const existingCalc = history?.find(
+                    (h) =>
+                        h.type === 'salary' &&
+                        JSON.stringify(h.inputs) === JSON.stringify(currentInputs)
+                );
+
+                if (existingCalc) {
+                    const oldDocRef = doc(db, `calculations/${user.uid}/items`, existingCalc.id);
+                    await deleteDoc(oldDocRef);
+                }
+
+                const calculationData = {
+                    type: 'salary',
+                    timestamp: serverTimestamp(),
+                    inputs: currentInputs,
+                };
+                const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const docRef = doc(db, `calculations/${user.uid}/items`, docId);
+                await setDoc(docRef, calculationData);
+            }
+        }, 3000);
+        return () => clearTimeout(timeoutRef.current);
+    }
+  }, [salaryInput, calculationType, engellilikDurumu, user, db, history]);
+
 
   return (
     <div style={styles.card}>

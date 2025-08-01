@@ -1,10 +1,11 @@
 // =================================================================
 // DOSYA: src/components/MarketplaceCalculator.js
-// AÇIKLAMA: Pazaryeri fiyat hesaplayıcı component'i.
+// AÇIKLAMA: Pazaryeri fiyat hesaplayıcı component'i. Firestore entegrasyonu eklendi.
 // =================================================================
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 
-const MarketplaceCalculator = ({ styles }) => {
+const MarketplaceCalculator = ({ styles, user, calculation, history }) => {
   const [gelisFiyati, setGelisFiyati] = useState('');
   const [kargo, setKargo] = useState('');
   const [paketleme, setPaketleme] = useState('');
@@ -18,6 +19,25 @@ const MarketplaceCalculator = ({ styles }) => {
   const [karMiktari, setKarMiktari] = useState(0);
   const [komisyonTutari, setKomisyonTutari] = useState(0);
 
+  const db = getFirestore();
+  const timeoutRef = useRef(null);
+  
+  // Geçmişten bir hesaplama seçildiğinde verileri yükle
+  useEffect(() => {
+    if (calculation && calculation.type === 'marketplace') {
+        const { inputs } = calculation;
+        setGelisFiyati(inputs.gelisFiyati !== undefined ? inputs.gelisFiyati : '');
+        setKargo(inputs.kargo !== undefined ? inputs.kargo : '');
+        setPaketleme(inputs.paketleme !== undefined ? inputs.paketleme : '');
+        setReklam(inputs.reklam !== undefined ? inputs.reklam : '');
+        setIadeOrani(inputs.iadeOrani !== undefined ? inputs.iadeOrani : '5');
+        setKomisyon(inputs.komisyon !== undefined ? inputs.komisyon : '15');
+        setKdv(inputs.kdv !== undefined ? inputs.kdv : '20');
+        setKar(inputs.kar !== undefined ? inputs.kar : '30');
+    }
+  }, [calculation]);
+
+  // Hesaplama yap ve sonucu state'e yaz
   useEffect(() => {
     const pGelisFiyati = parseFloat(gelisFiyati) || 0;
     const pKargo = parseFloat(kargo) || 0;
@@ -61,6 +81,43 @@ const MarketplaceCalculator = ({ styles }) => {
     setKomisyonTutari(finalCommission);
 
   }, [gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar]);
+    
+  // Kullanıcı yazmayı bıraktıktan 3 saniye sonra veriyi kaydet
+  useEffect(() => {
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(async () => {
+      const isGelisFiyatiValid = gelisFiyati !== '' && !isNaN(parseFloat(gelisFiyati));
+      const isKargoValid = kargo !== '' && !isNaN(parseFloat(kargo));
+      const isKarValid = kar !== '' && !isNaN(parseFloat(kar));
+
+      if (user && isGelisFiyatiValid && isKargoValid && isKarValid) {
+        const currentInputs = { gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar };
+
+        const existingCalc = history?.find(
+          (h) =>
+            h.type === 'marketplace' &&
+            JSON.stringify(h.inputs) === JSON.stringify(currentInputs)
+        );
+
+        if (existingCalc) {
+          const oldDocRef = doc(db, `calculations/${user.uid}/items`, existingCalc.id);
+          await deleteDoc(oldDocRef);
+        }
+
+        const calculationData = {
+          type: 'marketplace',
+          timestamp: serverTimestamp(),
+          inputs: currentInputs,
+          results: { satisFiyati, toplamMaliyet, karMiktari, komisyonTutari }
+        };
+        const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const docRef = doc(db, `calculations/${user.uid}/items`, docId);
+        await setDoc(docRef, calculationData);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeoutRef.current);
+  }, [gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar, satisFiyati, toplamMaliyet, karMiktari, komisyonTutari, user, db, history]);
 
   return (
     <div style={styles.card}>
@@ -82,19 +139,19 @@ const MarketplaceCalculator = ({ styles }) => {
       <p style={styles.label}>İstenen Net Kâr Oranı (%)</p>
       <input style={styles.input} type="number" placeholder="Örn: 30" value={kar} onChange={(e) => setKar(e.target.value)} />
       
-      <div style={{...styles.resultContainer, ...styles.highlightedResult}}>
+      <div style={{...styles.resultContainer, ...styles.highlightedResult, margin: '8px auto 0 auto'}}>
           <p style={styles.highlightedResultLabel}>Önerilen Satış Fiyatı:</p>
           <p style={styles.highlightedResultValue}>{satisFiyati.toFixed(2).replace('.',',')} ₺</p>
       </div>
-       <div style={{...styles.resultContainer, marginTop: '10px'}}>
+       <div style={{...styles.resultContainer, margin: '8px auto'}}>
           <p style={styles.resultLabel}>Ürün Başına Toplam Net Maliyet:</p>
           <p style={styles.resultValue}>{toplamMaliyet.toFixed(2).replace('.',',')} ₺</p>
       </div>
-      <div style={{...styles.resultContainer, marginTop: '10px'}}>
+      <div style={{...styles.resultContainer, margin: '8px auto'}}>
           <p style={styles.resultLabel}>Beklenen Kâr Miktarı:</p>
           <p style={styles.resultValue}>{karMiktari.toFixed(2).replace('.',',')} ₺</p>
       </div>
-      <div style={{...styles.resultContainer, marginTop: '10px'}}>
+      <div style={{...styles.resultContainer, margin: '8px auto'}}>
           <p style={styles.resultLabel}>Pazaryerine Ödenen Komisyon:</p>
           <p style={styles.resultValue}>{komisyonTutari.toFixed(2).replace('.',',')} ₺</p>
       </div>
