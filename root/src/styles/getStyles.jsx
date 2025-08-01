@@ -29,7 +29,7 @@ const getStyles = (theme) => {
 
   return {
     safeArea: { flex: 1, backgroundColor: colors.background, fontFamily: 'sans-serif', minHeight: '100vh', position: 'relative', overflowX: 'hidden' },
-    container: { padding: 20, maxWidth: '800px', margin: 'auto', paddingTop: '80px' },
+    container: { padding: 20, maxWidth: '1800px', margin: 'auto', paddingTop: '80px' },
     header: { position: 'fixed', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: '60px', backgroundColor: colors.card, boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.05 : 0.2})`, zIndex: 1000 },
     headerLeft: { display: 'flex', alignItems: 'center' },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginLeft: '10px' },

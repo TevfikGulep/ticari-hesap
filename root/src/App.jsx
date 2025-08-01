@@ -4,6 +4,7 @@
 // Kullanıcı oturum durumu yönetiliyor.
 // =================================================================
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 // Firebase ve Auth imports
 import app from './firebaseConfig'; // Firebase'i başlatmak için
