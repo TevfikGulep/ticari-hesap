@@ -45,7 +45,7 @@ const getStyles = (theme) => {
     cardTitle: { fontSize: 20, fontWeight: '600', color: colors.cardTitle, marginBottom: 16 },
     label: { fontSize: 14, color: colors.label, marginBottom: 8 },
     input: { backgroundColor: colors.inputBg, borderRadius: 8, padding: '12px 16px', fontSize: 16, color: colors.inputText, marginBottom: 16, border: `1px solid ${colors.inputBorder}`, width: '100%', boxSizing: 'border-box' },
-    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginTop: 8 },
+    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginBottom: 10 },
     resultLabel: { fontSize: 16, color: colors.resultLabel },
     resultValue: { fontSize: 20, fontWeight: 'bold', color: colors.text },
     highlightedResult: { backgroundColor: isLight ? '#e6f7ff' : '#032f4a', border: `1px solid ${isLight ? '#91d5ff' : '#054569'}` },

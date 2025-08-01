@@ -46,7 +46,7 @@ const ProfitCalculator = ({ styles }) => {
           <p style={styles.resultLabel}>Net Kâr/Zarar Tutarı:</p>
           <p style={{ ...styles.resultValue, color: getResultColor() }}>{sonucTutar.toFixed(2).replace('.',',')} ₺</p>
       </div>
-      <div style={styles.resultContainer}>
+      <div style={{...styles.resultContainer, marginTop: '10px'}}>
           <p style={styles.resultLabel}>Net Kâr/Zarar Oranı:</p>
           <p style={{ ...styles.resultValue, color: getResultColor() }}>{sonucOran.toFixed(2).replace('.',',')} %</p>
       </div>
