@@ -1,13 +1,12 @@
 // =================================================================
 // DOSYA: src/App.js (GÜNCELLENDİ)
-// AÇIKLAMA: Firebase ve Auth component'i entegre edildi.
-// Kullanıcı oturum durumu yönetiliyor.
+// AÇIKLAMA: Merkezi Firebase auth servisi kullanıldı.
 // =================================================================
 import React, { useState, useEffect } from 'react';
 
 // Firebase ve Auth imports
-import app from './firebaseConfig'; // Firebase'i başlatmak için
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth } from './firebaseConfig'; // Merkezi auth servisini import et
+import { onAuthStateChanged } from "firebase/auth";
 
 // Stil ve Component imports
 import getStyles from './styles/getStyles';
@@ -27,7 +26,6 @@ const App = () => {
 
   // Firebase auth state dinleyicisi
   useEffect(() => {
-    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });

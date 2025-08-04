@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.web.ticari_hesap.twa",
+      "sha256_cert_fingerprints": [
+        "26:72:6C:50:31:28:CA:50:AF:3D:B0:D9:E5:E3:7E:83:77:CB:01:89:91:93:38:EE:2A:6E:71:D6:DA:BD:EE:21"
+      ]
+    }
+  }
+]

@@ -1,8 +1,10 @@
 // =================================================================
 // DOSYA: src/firebaseConfig.js
 // AÇIKLAMA: Firebase projesinin yapılandırma bilgilerini içerir.
+// Firebase app ve auth servisleri burada başlatılıp dışa aktarılır.
 // =================================================================
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -18,7 +20,9 @@ const firebaseConfig = {
 
 // Firebase'i başlat
 const app = initializeApp(firebaseConfig);
-// Analytics'i başlat (isteğe bağlı)
-const analytics = getAnalytics(app);
+
+// Servisleri başlat ve dışa aktar
+export const auth = getAuth(app);
+export const analytics = getAnalytics(app);
 
 export default app;

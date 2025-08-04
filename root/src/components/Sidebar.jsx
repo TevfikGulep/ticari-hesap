@@ -1,80 +1,116 @@
-// =================================================================
-// DOSYA: src/components/Sidebar.jsx
-// AÇIKLAMA: Hesaplama geçmişini gösteren kenar çubuğu bileşeni.
-// =================================================================
-import React from 'react';
+// root/src/components/Sidebar.jsx
 
-const Sidebar = ({ history, onSelect, onClose, styles }) => {
-  if (!history) {
-    return null;
-  }
+import { HomeIcon, HomeIconSolid, MenuIcon, XIcon, SunIcon, MoonIcon } from './Icons';
 
-  const formatCurrency = (value) => {
-    const number = parseFloat(String(value).replace(',', '.'));
-    return isNaN(number) ? '' : new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(number);
-  };
+const Sidebar = ({
+  isOpen,
+  onToggle,
+  onSelectCalculator,
+  calculators,
+  currentCalculator,
+  theme,
+  onToggleTheme,
+  homepage,
+  onSetHomepage,
+}) => {
+  const getStyles = (theme) => ({
+    sidebar: {
+      backgroundColor: theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
+      color: theme === 'dark' ? '#f0f0f0' : '#1a1a1a',
+    },
+    link: {
+      color: theme === 'dark' ? '#f0f0f0' : '#1a1a1a',
+    },
+    activeLink: {
+      backgroundColor: theme === 'dark' ? '#333' : '#ddd',
+    },
+    button: {
+      color: theme === 'dark' ? '#f0f0f0' : '#1a1a1a',
+    },
+  });
 
-  const getCalculationTitle = (calc) => {
-    try {
-      switch (calc.type) {
-        case 'profit':
-          const profitRate = calc.results?.sonucOran;
-          return `Kâr/Zarar: ${profitRate ? profitRate.toFixed(2).replace('.',',') + ' %' : ''}`;
-        case 'sales_price':
-          const salesPrice = calc.results?.satisFiyati;
-          return `Satış Fiyatı: ${salesPrice ? formatCurrency(salesPrice) : ''}`;
-        case 'marketplace':
-          const marketplacePrice = calc.results?.satisFiyati;
-          return `Pazaryeri Fiyatı: ${marketplacePrice ? formatCurrency(marketplacePrice) : ''}`;
-        case 'salary':
-          const salary = calc.inputs?.salaryInput;
-          return `Maaş: ${salary || ''} ₺`;
-        default:
-          return 'Bilinmeyen Hesaplama';
-      }
-    } catch (error) {
-        console.error("Error generating title:", error);
-        return "Hatalı Hesaplama";
-    }
-  };
+  const styles = getStyles(theme);
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={{...styles.sideMenu, right: 0, left: 'auto' }} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.sideMenuHeader}>
-          <h2 style={styles.sideMenuTitle}>Hesaplama Geçmişi</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: styles.text?.color }}>&times;</button>
+    <>
+      <button
+        onClick={onToggle}
+        className="fixed top-4 left-4 z-30 p-2 rounded-md transition-colors"
+        style={styles.button}
+        aria-label="Menüyü aç"
+      >
+        <MenuIcon className="h-6 w-6" />
+      </button>
+
+      <div
+        className={`fixed top-0 left-0 h-full z-40 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={styles.sidebar}
+      >
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-bold">Hesaplayıcılar</h2>
+          <button onClick={onToggle} className="p-2" aria-label="Menüyü kapat">
+            <XIcon className="h-6 w-6" />
+          </button>
         </div>
-        {history.length === 0 ? (
-          <p style={{ padding: '20px', color: styles.label?.color }}>Henüz bir hesaplama yapmadınız.</p>
-        ) : (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {history.map((calc) => (
-              <li key={calc.id} style={{ borderBottom: `1px solid ${styles.inputBorder?.color}` }}>
-                <button
-                  onClick={() => {
-                    onSelect(calc);
-                    onClose();
-                  }}
-                  style={{
-                    ...styles.menuItem,
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '15px 20px',
-                  }}
-                >
-                  <span style={{ fontWeight: 'bold', color: styles.cardTitle?.color }}>{getCalculationTitle(calc)}</span>
-                  <br />
-                  <span style={{ fontSize: 12, color: styles.label?.color }}>
-                    {calc.timestamp ? new Date(calc.timestamp.toDate()).toLocaleString('tr-TR') : 'Tarih Yok'}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <nav className="flex flex-col p-4 space-y-2">
+          {Object.keys(calculators).map((key) => (
+            <div key={key} className="flex items-center justify-between">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelectCalculator(key);
+                  onToggle();
+                }}
+                className={`block p-2 rounded-md ${
+                  currentCalculator === key ? 'font-bold' : ''
+                }`}
+                style={{
+                  ...styles.link,
+                  ...(currentCalculator === key ? styles.activeLink : {}),
+                }}
+              >
+                {calculators[key].name}
+              </a>
+              <button
+                onClick={() => onSetHomepage(key)}
+                className="p-2 rounded-full hover:bg-gray-500/20"
+                aria-label={`${calculators[key].name} sayfasını açılış sayfası yap`}
+              >
+                {homepage === key ? (
+                  <HomeIconSolid className="h-5 w-5" />
+                ) : (
+                  <HomeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          ))}
+        </nav>
+        <div className="absolute bottom-4 left-4">
+          <button
+            onClick={onToggleTheme}
+            className="p-2 rounded-full transition-colors"
+            style={styles.button}
+            aria-label="Temayı değiştir"
+          >
+            {theme === 'dark' ? (
+              <SunIcon className="h-6 w-6" />
+            ) : (
+              <MoonIcon className="h-6 w-6" />
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 z-30"
+          onClick={onToggle}
+        ></div>
+      )}
+    </>
   );
 };
 
