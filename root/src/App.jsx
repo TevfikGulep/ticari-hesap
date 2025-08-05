@@ -1,7 +1,6 @@
 // =================================================================
 // DOSYA: root/src/App.js (GÜNCELLENDİ)
-// AÇIKLAMA: Sol menüye ikonlar eklendi ve varsayılan açılış sayfası
-//             özelliği eklendi.
+// AÇIKLAMA: Sol menüdeki ikonlar kaldırıldı ve stil iyileştirmeleri yapıldı.
 // =================================================================
 import React, { useState, useEffect } from 'react';
 import './App.css';
@@ -11,7 +10,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // Stil ve Component imports
 import getStyles from './styles/getStyles';
-import { MenuIcon, CloseIcon, ProfitLossIcon, SalesPriceIcon, MarketplaceIcon, SalaryIcon, ExpensesIcon, UnitCostIcon, HomeIcon, HomeIconSolid } from './components/Icons';
+import { MenuIcon, CloseIcon, HomeIcon, HomeIconSolid } from './components/Icons';
 import Auth from './components/Auth';
 import History from './components/History';
 import ProfitCalculator from './components/ProfitCalculator';
@@ -40,16 +39,14 @@ const App = () => {
           setHomepage(savedHomepage);
           setActiveView(savedHomepage);
         } else {
-          // Set default homepage if none is saved
           setActiveView(homepage);
         }
       } else {
-        // Default view for logged-out users
         setActiveView('profitCalculator');
       }
     });
     return () => unsubscribe();
-  }, [homepage]);
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -70,12 +67,12 @@ const App = () => {
   const styles = getStyles(theme);
   
   const menuItems = [
-    { id: 'profitCalculator', title: 'Kâr Zarar Hesaplama', icon: <ProfitLossIcon style={styles.menuItemIcon} /> },
-    { id: 'salesPriceCalculator', title: 'Satış Fiyatı Hesaplama', icon: <SalesPriceIcon style={styles.menuItemIcon} /> },
-    { id: 'marketplaceCalculator', title: 'Pazaryeri Fiyat Hesaplama', icon: <MarketplaceIcon style={styles.menuItemIcon} /> },
-    { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama', icon: <SalaryIcon style={styles.menuItemIcon} /> },
-    { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama', icon: <ExpensesIcon style={styles.menuItemIcon} /> },
-    { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama', icon: <UnitCostIcon style={styles.menuItemIcon} /> },
+    { id: 'profitCalculator', title: 'Kâr Zarar Hesaplama' },
+    { id: 'salesPriceCalculator', title: 'Satış Fiyatı Hesaplama' },
+    { id: 'marketplaceCalculator', title: 'Pazaryeri Fiyat Hesaplama' },
+    { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama' },
+    { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama' },
+    { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama' },
   ];
   
   const handleMenuClick = (viewId) => {
@@ -135,7 +132,6 @@ const App = () => {
               style={styles.menuItemButton} 
               onClick={() => handleMenuClick(item.id)}
             >
-              {item.icon}
               <span style={styles.menuItemText}>{item.title}</span>
             </button>
             {user && (
