@@ -1,6 +1,10 @@
 {
+  "id": "/",
+  "dir": "ltr",
+  "lang": "tr",
   "short_name": "Ticari Hesap",
   "name": "Ticari Hesaplayıcı",
+  "description": "Kâr-zarar, satış fiyatı, Trendyol, Hepsiburada gibi pazaryeri komisyonları ve maaş hesaplamaları için hepsi bir arada ticari hesaplayıcı.",
   "icons": [
     {
       "src": "logo192.png",
