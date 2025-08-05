@@ -1,16 +1,16 @@
 // =================================================================
-// DOSYA: src/components/MarketplaceCalculator.js
-// AÇIKLAMA: Pazaryeri fiyat hesaplayıcı component'i. Firestore entegrasyonu eklendi.
+// DOSYA: root/src/components/MarketplaceCalculator.js (GÜNCELLENDİ)
+// AÇIKLAMA: Güncellenmiş saveCalculation fonksiyonu kullanıldı.
 // =================================================================
 import React, { useState, useEffect, useRef } from 'react';
-import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { saveCalculation } from '../firebaseConfig';
 
-const MarketplaceCalculator = ({ styles, user, calculation, history }) => {
+const MarketplaceCalculator = ({ styles, calculation, user }) => {
   const [gelisFiyati, setGelisFiyati] = useState('');
   const [kargo, setKargo] = useState('');
   const [paketleme, setPaketleme] = useState('');
   const [reklam, setReklam] = useState('');
-  const [iadeOrani, setIadeOrani] = useState('5');
+  const [iadeOrani, setIadeOrani] =useState('5');
   const [komisyon, setKomisyon] = useState('15');
   const [kdv, setKdv] = useState('20');
   const [kar, setKar] = useState('30');
@@ -19,12 +19,10 @@ const MarketplaceCalculator = ({ styles, user, calculation, history }) => {
   const [karMiktari, setKarMiktari] = useState(0);
   const [komisyonTutari, setKomisyonTutari] = useState(0);
 
-  const db = getFirestore();
   const timeoutRef = useRef(null);
-  
-  // Geçmişten bir hesaplama seçildiğinde verileri yükle
+
   useEffect(() => {
-    if (calculation && calculation.type === 'marketplace') {
+    if (calculation && calculation.title === 'Pazaryeri Fiyat Hesaplama') {
         const { inputs } = calculation;
         setGelisFiyati(inputs.gelisFiyati !== undefined ? inputs.gelisFiyati : '');
         setKargo(inputs.kargo !== undefined ? inputs.kargo : '');
@@ -37,7 +35,6 @@ const MarketplaceCalculator = ({ styles, user, calculation, history }) => {
     }
   }, [calculation]);
 
-  // Hesaplama yap ve sonucu state'e yaz
   useEffect(() => {
     const pGelisFiyati = parseFloat(gelisFiyati) || 0;
     const pKargo = parseFloat(kargo) || 0;
@@ -80,44 +77,33 @@ const MarketplaceCalculator = ({ styles, user, calculation, history }) => {
     setKarMiktari(finalProfit);
     setKomisyonTutari(finalCommission);
 
-  }, [gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar]);
-    
-  // Kullanıcı yazmayı bıraktıktan 3 saniye sonra veriyi kaydet
-  useEffect(() => {
     clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(async () => {
-      const isGelisFiyatiValid = gelisFiyati !== '' && !isNaN(parseFloat(gelisFiyati));
-      const isKargoValid = kargo !== '' && !isNaN(parseFloat(kargo));
-      const isKarValid = kar !== '' && !isNaN(parseFloat(kar));
-
-      if (user && isGelisFiyatiValid && isKargoValid && isKarValid) {
-        const currentInputs = { gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar };
-
-        const existingCalc = history?.find(
-          (h) =>
-            h.type === 'marketplace' &&
-            JSON.stringify(h.inputs) === JSON.stringify(currentInputs)
-        );
-
-        if (existingCalc) {
-          const oldDocRef = doc(db, `calculations/${user.uid}/items`, existingCalc.id);
-          await deleteDoc(oldDocRef);
-        }
-
-        const calculationData = {
-          type: 'marketplace',
-          timestamp: serverTimestamp(),
-          inputs: currentInputs,
-          results: { satisFiyati, toplamMaliyet, karMiktari, komisyonTutari }
-        };
-        const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const docRef = doc(db, `calculations/${user.uid}/items`, docId);
-        await setDoc(docRef, calculationData);
+    timeoutRef.current = setTimeout(() => {
+      if (user && user.uid && pGelisFiyati > 0) {
+        saveCalculation(user.uid, {
+          title: 'Pazaryeri Fiyat Hesaplama',
+          inputs: {
+            gelisFiyati,
+            kargo,
+            paketleme,
+            reklam,
+            iadeOrani,
+            komisyon,
+            kdv,
+            kar,
+          },
+          outputs: {
+            'Önerilen Satış Fiyatı': `${satisFiyati.toFixed(2)} ₺`,
+            'Toplam Net Maliyet': `${toplamMaliyet.toFixed(2)} ₺`,
+            'Beklenen Kâr Miktarı': `${karMiktari.toFixed(2)} ₺`,
+            'Pazaryerine Ödenen Komisyon': `${komisyonTutari.toFixed(2)} ₺`,
+          },
+        });
       }
     }, 3000);
 
     return () => clearTimeout(timeoutRef.current);
-  }, [gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar, satisFiyati, toplamMaliyet, karMiktari, komisyonTutari, user, db, history]);
+  }, [gelisFiyati, kargo, paketleme, reklam, iadeOrani, komisyon, kdv, kar, user, satisFiyati, toplamMaliyet, karMiktari, komisyonTutari]);
 
   return (
     <div style={styles.card}>

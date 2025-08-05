@@ -1,20 +1,17 @@
 // =================================================================
-// DOSYA: src/components/SalaryCalculator.js
-// AÇIKLAMA: Brüt/Net maaş hesaplayıcı component'i.
-// *** GÜNCELLENDİ: Parametreler 2025 yılı resmi verileriyle ve
-// sağlanan Excel mantığına göre güncellendi. ***
+// DOSYA: root/src/components/SalaryCalculator.js (GÜNCELLENDİ)
+// AÇIKLAMA: Güncellenmiş saveCalculation fonksiyonu kullanıldı.
 // =================================================================
 import React, { useState, useEffect, useRef } from 'react';
-import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { saveCalculation } from '../firebaseConfig';
 
-const SalaryCalculator = ({ styles, user, calculation, history }) => {
+const SalaryCalculator = ({ styles, calculation, user }) => {
   const [calculationType, setCalculationType] = useState('grossToNet');
   const [salaryInput, setSalaryInput] = useState('');
   const [engellilikDurumu, setEngellilikDurumu] = useState('yok');
   const [monthlyBreakdown, setMonthlyBreakdown] = useState([]);
   const [yearlyTotals, setYearlyTotals] = useState(null);
 
-  const db = getFirestore();
   const timeoutRef = useRef(null);
 
   const formatLocale = (number) => {
@@ -34,7 +31,7 @@ const SalaryCalculator = ({ styles, user, calculation, history }) => {
   };
 
   useEffect(() => {
-    if (calculation && calculation.type === 'salary') {
+    if (calculation && calculation.title === 'Brüt/Net Maaş Hesaplama') {
         const { inputs } = calculation;
         setCalculationType(inputs.calculationType || 'grossToNet');
         setSalaryInput(inputs.salaryInput || '');
@@ -169,47 +166,31 @@ const SalaryCalculator = ({ styles, user, calculation, history }) => {
     };
 
     calculate();
-
   }, [salaryInput, calculationType, engellilikDurumu]);
 
-  // Firestore'a kaydetme
   useEffect(() => {
-    if (user) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(async () => {
-            const pSalaryInput = parseFloat(salaryInput.replace(/\./g, '').replace(',', '.')) || 0;
-            if (pSalaryInput > 0) {
-                const currentInputs = {
-                    calculationType,
-                    salaryInput,
-                    engellilikDurumu,
-                };
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      const pSalaryInput = parseFloat(salaryInput.replace(/\./g, '').replace(',', '.')) || 0;
+      if (user && user.uid && pSalaryInput > 0) {
+        saveCalculation(user.uid, {
+          title: 'Brüt/Net Maaş Hesaplama',
+          inputs: {
+            calculationType,
+            salaryInput,
+            engellilikDurumu,
+          },
+          outputs: {
+            'Yıllık Brüt Maaş': `${formatLocale(yearlyTotals?.brut)} ₺`,
+            'Yıllık Net Maaş': `${formatLocale(yearlyTotals?.net)} ₺`,
+            'Yıllık İşverene Maliyet': `${formatLocale(yearlyTotals?.isvereneMaliyet)} ₺`,
+          },
+        });
+      }
+    }, 3000);
 
-                const existingCalc = history?.find(
-                    (h) =>
-                        h.type === 'salary' &&
-                        JSON.stringify(h.inputs) === JSON.stringify(currentInputs)
-                );
-
-                if (existingCalc) {
-                    const oldDocRef = doc(db, `calculations/${user.uid}/items`, existingCalc.id);
-                    await deleteDoc(oldDocRef);
-                }
-
-                const calculationData = {
-                    type: 'salary',
-                    timestamp: serverTimestamp(),
-                    inputs: currentInputs,
-                };
-                const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const docRef = doc(db, `calculations/${user.uid}/items`, docId);
-                await setDoc(docRef, calculationData);
-            }
-        }, 3000);
-        return () => clearTimeout(timeoutRef.current);
-    }
-  }, [salaryInput, calculationType, engellilikDurumu, user, db, history]);
-
+    return () => clearTimeout(timeoutRef.current);
+  }, [salaryInput, calculationType, engellilikDurumu, yearlyTotals, user]);
 
   return (
     <div style={styles.card}>

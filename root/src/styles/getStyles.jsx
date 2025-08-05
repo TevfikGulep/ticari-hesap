@@ -1,8 +1,3 @@
-// =================================================================
-// DOSYA: src/styles/getStyles.js
-// AÇIKLAMA: Tema ve stil tanımlamalarını içerir. Auth component'i
-// için yeni stiller eklendi.
-// =================================================================
 const getStyles = (theme) => {
   const isLight = theme === 'light';
   const colors = {
@@ -25,6 +20,8 @@ const getStyles = (theme) => {
     toggleText: isLight ? '#374151' : '#d1d5db',
     authButtonBg: isLight ? '#4285F4' : '#4285F4',
     authButtonText: '#ffffff',
+    danger: isLight ? '#dc2626' : '#f87171',
+    dangerHover: isLight ? '#b91c1c' : '#ef4444',
   };
 
   return {
@@ -32,6 +29,7 @@ const getStyles = (theme) => {
     container: { padding: 20, maxWidth: '1800px', margin: 'auto', paddingTop: '80px' },
     header: { position: 'fixed', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: '60px', backgroundColor: colors.card, boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.05 : 0.2})`, zIndex: 1000 },
     headerLeft: { display: 'flex', alignItems: 'center' },
+    headerRight: { display: 'flex', alignItems: 'center', gap: '10px' },
     headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginLeft: '10px' },
     menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '10px' },
     menuIcon: { color: colors.icon },
@@ -39,8 +37,10 @@ const getStyles = (theme) => {
     sideMenu: { position: 'fixed', top: 0, bottom: 0, width: '300px', backgroundColor: colors.menuBg, zIndex: 1002, boxShadow: '2px 0 10px rgba(0,0,0,0.1)', transition: 'left 0.3s ease-in-out' },
     sideMenuHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: `1px solid ${colors.inputBorder}` },
     sideMenuTitle: { fontSize: 18, fontWeight: '600', color: colors.text, margin: 0 },
-    menuItem: { display: 'block', width: '100%', padding: '15px 20px', border: 'none', backgroundColor: 'transparent', textAlign: 'left', fontSize: 16, color: colors.text, cursor: 'pointer' },
+    menuItem: { display: 'flex', alignItems: 'center', width: '100%', padding: '15px 20px', border: 'none', backgroundColor: 'transparent', textAlign: 'left', fontSize: 16, color: colors.text, cursor: 'pointer' },
     menuItemActive: { backgroundColor: colors.menuItemHover, fontWeight: 'bold', color: colors.navActiveText },
+    menuItemIcon: { marginRight: '15px', color: 'currentColor', width: '20px', height: '20px' },
+    menuItemText: { flex: 1 },
     card: { backgroundColor: colors.card, borderRadius: 12, padding: 20, marginBottom: 20, boxShadow: `0 2px 8px rgba(0, 0, 0, ${isLight ? 0.1 : 0.3})`, border: isLight ? 'none' : `1px solid ${colors.inputBorder}`, margin: 'auto' },
     cardTitle: { fontSize: 20, fontWeight: '600', color: colors.cardTitle, marginBottom: 16 },
     label: { fontSize: 14, color: colors.label, marginBottom: 8 },
@@ -60,51 +60,23 @@ const getStyles = (theme) => {
     tdHighlighted: { padding: '8px', border: `1px solid ${colors.inputBorder}`, textAlign: 'right', fontWeight: 'bold', color: colors.navActiveText },
     tfootTr: { backgroundColor: colors.resultBg, borderTop: `2px solid ${colors.inputBorder}` },
     tfootTd: { padding: '10px 8px', border: `1px solid ${colors.inputBorder}`, textAlign: 'right', color: colors.text },
-    // --- Auth Styles ---
-    authContainer: { display: 'flex', alignItems: 'center', gap: '10px' },
-    profileButton: { 
-        display: 'flex', 
-        alignItems: 'center', 
-        background: colors.inputBg, 
-        border: `1px solid ${colors.inputBorder}`, 
-        padding: '6px 12px', 
-        borderRadius: '9999px', // Tamamen yuvarlak kenarlar için
-        cursor: 'pointer',
-        boxShadow: `0 1px 3px rgba(0, 0, 0, ${isLight ? 0.1 : 0.4})`,
-        transition: 'background-color 0.2s, box-shadow 0.2s',
-        '&:hover': { 
-            backgroundColor: colors.menuItemHover,
-            boxShadow: `0 2px 8px rgba(0, 0, 0, ${isLight ? 0.15 : 0.5})`,
-        } 
-    },
-    profileImage: { width: '28px', height: '28px', borderRadius: '50%' },
-    userName: { color: colors.text, fontWeight: '500', fontSize: '14px', marginLeft: '8px', marginRight: '4px' },
-    signOutButton: { 
-        backgroundColor: 'transparent', 
-        color: colors.label, 
-        border: 'none',
-        borderRadius: '6px', 
-        padding: '8px 12px', 
-        cursor: 'pointer', 
-        fontSize: '14px', 
-        fontWeight: '500',
-        '&:hover': { 
-            color: colors.text,
-            backgroundColor: colors.menuItemHover 
-        } 
-    },
-    signInButton: { 
-        display: 'flex', 
-        alignItems: 'center', 
-        backgroundColor: colors.authButtonBg, 
-        color: colors.authButtonText, 
-        border: 'none', 
-        borderRadius: '6px', 
-        padding: '8px 16px', 
-        fontSize: '14px', 
-        fontWeight: '500' 
-    },
+    authContainer: { position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' },
+    signInButton: { display: 'flex', alignItems: 'center', backgroundColor: colors.authButtonBg, color: colors.authButtonText, border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '14px', fontWeight: '500' },
     googleIcon: { width: '18px', height: '18px', marginRight: '10px' },
+    profileImage: { width: '40px', height: '40px', borderRadius: '50%' },
+    historyButton: { backgroundColor: 'transparent', color: colors.text, border: '1px solid ' + colors.inputBorder, borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' },
+    
+    // History Panel Styles
+    historyPanel: { position: 'fixed', top: 0, right: 0, bottom: 0, width: '320px', backgroundColor: colors.card, zIndex: 1002, boxShadow: '-2px 0 10px rgba(0,0,0,0.1)', transition: 'right 0.3s ease-in-out', display: 'flex', flexDirection: 'column' },
+    historyHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: `1px solid ${colors.inputBorder}` },
+    historyTitle: { fontSize: 18, fontWeight: '600', color: colors.text, margin: 0 },
+    closeButton: { background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: colors.label },
+    historyContent: { flex: 1, overflowY: 'auto', padding: '10px' },
+    historyItem: { padding: '15px', borderBottom: `1px solid ${colors.inputBorder}`, cursor: 'pointer', '&:hover': { backgroundColor: colors.menuItemHover } },
+    historyItemTitle: { fontWeight: 'bold', color: colors.text, marginBottom: '5px', fontSize: '14px' },
+    historyItemTimestamp: { fontSize: '10px', color: colors.label, marginTop: '5px' },
+    historyFooter: { padding: '20px', borderTop: `1px solid ${colors.inputBorder}` },
+    logoutButton: { backgroundColor: colors.danger, color: 'white', border: 'none', borderRadius: '6px', padding: '10px 16px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', width: '100%', textAlign: 'center' },
   };
 };
 

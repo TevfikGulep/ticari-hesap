@@ -1,17 +1,19 @@
 // =================================================================
-// DOSYA: src/App.js (GÜNCELLENDİ)
-// AÇIKLAMA: Merkezi Firebase auth servisi kullanıldı.
+// DOSYA: root/src/App.js (GÜNCELLENDİ)
+// AÇIKLAMA: Sol menüye ikonlar eklendi ve varsayılan açılış sayfası
+//             özelliği eklendi.
 // =================================================================
 import React, { useState, useEffect } from 'react';
-
-// Firebase ve Auth imports
-import { auth } from './firebaseConfig'; // Merkezi auth servisini import et
+import './App.css';
 import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from './firebaseConfig';
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // Stil ve Component imports
 import getStyles from './styles/getStyles';
-import { MenuIcon, CloseIcon } from './components/Icons';
+import { MenuIcon, CloseIcon, ProfitLossIcon, SalesPriceIcon, MarketplaceIcon, SalaryIcon, ExpensesIcon, UnitCostIcon, HomeIcon, HomeIconSolid } from './components/Icons';
 import Auth from './components/Auth';
+import History from './components/History';
 import ProfitCalculator from './components/ProfitCalculator';
 import SalesPriceCalculator from './components/SalesPriceCalculator';
 import MarketplaceCalculator from './components/MarketplaceCalculator';
@@ -21,19 +23,34 @@ import Placeholder from './components/Placeholder';
 const App = () => {
   const [activeView, setActiveView] = useState('profitCalculator');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [theme, setTheme] = useState('light');
-  const [user, setUser] = useState(null); // Kullanıcı state'i
+  const [user, setUser] = useState(null);
+  const [selectedCalculation, setSelectedCalculation] = useState(null);
+  const [homepage, setHomepage] = useState('profitCalculator');
 
-  // Firebase auth state dinleyicisi
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().homepage) {
+          const savedHomepage = userDoc.data().homepage;
+          setHomepage(savedHomepage);
+          setActiveView(savedHomepage);
+        } else {
+          // Set default homepage if none is saved
+          setActiveView(homepage);
+        }
+      } else {
+        // Default view for logged-out users
+        setActiveView('profitCalculator');
+      }
     });
-    // Component unmount olduğunda dinleyiciyi kaldır
     return () => unsubscribe();
-  }, []);
+  }, [homepage]);
 
-  // Cihazın renk şemasına göre tema belirle
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setTheme(mediaQuery.matches ? 'dark' : 'light');
@@ -41,39 +58,63 @@ const App = () => {
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
+  
+  const handleSetHomepage = async (viewId) => {
+    if (user) {
+      setHomepage(viewId);
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { homepage: viewId }, { merge: true });
+    }
+  };
 
   const styles = getStyles(theme);
   
   const menuItems = [
-    { id: 'profitCalculator', title: 'Kâr Zarar Hesaplama' },
-    { id: 'salesPriceCalculator', title: 'Satış Fiyatı Hesaplama' },
-    { id: 'marketplaceCalculator', title: 'Pazaryeri Fiyat Hesaplama' },
-    { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama' },
-    { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama' },
-    { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama' },
+    { id: 'profitCalculator', title: 'Kâr Zarar Hesaplama', icon: <ProfitLossIcon style={styles.menuItemIcon} /> },
+    { id: 'salesPriceCalculator', title: 'Satış Fiyatı Hesaplama', icon: <SalesPriceIcon style={styles.menuItemIcon} /> },
+    { id: 'marketplaceCalculator', title: 'Pazaryeri Fiyat Hesaplama', icon: <MarketplaceIcon style={styles.menuItemIcon} /> },
+    { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama', icon: <SalaryIcon style={styles.menuItemIcon} /> },
+    { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama', icon: <ExpensesIcon style={styles.menuItemIcon} /> },
+    { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama', icon: <UnitCostIcon style={styles.menuItemIcon} /> },
   ];
   
   const handleMenuClick = (viewId) => {
     setActiveView(viewId);
+    setSelectedCalculation(null);
     setIsMenuOpen(false);
+  };
+
+  const handleCalculationSelect = (calc) => {
+    const viewMap = {
+      'Kâr/Zarar Hesaplama': 'profitCalculator',
+      'Satış Fiyatı Hesaplama': 'salesPriceCalculator',
+      'Pazaryeri Fiyat Hesaplama': 'marketplaceCalculator',
+      'Brüt/Net Maaş Hesaplama': 'salaryCalculator',
+    };
+    const viewId = viewMap[calc.title];
+    if (viewId) {
+      setActiveView(viewId);
+      setSelectedCalculation(calc);
+    }
   };
   
   const renderActiveView = () => {
+    const props = { styles, calculation: selectedCalculation, user };
     switch(activeView) {
       case 'profitCalculator':
-        return <ProfitCalculator styles={styles} />;
+        return <ProfitCalculator {...props} />;
       case 'salesPriceCalculator':
-        return <SalesPriceCalculator styles={styles} />;
+        return <SalesPriceCalculator {...props} />;
       case 'marketplaceCalculator':
-        return <MarketplaceCalculator styles={styles} />;
+        return <MarketplaceCalculator {...props} />;
       case 'salaryCalculator':
-        return <SalaryCalculator styles={styles} />;
+        return <SalaryCalculator {...props} />;
       case 'expenseCalculator':
         return <Placeholder title="İşyeri Gider Hesaplama" styles={styles} />;
       case 'unitCostCalculator':
         return <Placeholder title="Ürün Başı İşletme Maliyeti Hesaplama" styles={styles} />;
       default:
-        return <ProfitCalculator styles={styles} />;
+        return <ProfitCalculator {...props} />;
     }
   };
 
@@ -89,13 +130,20 @@ const App = () => {
           </button>
         </div>
         {menuItems.map(item => (
-          <button 
-            key={item.id} 
-            style={activeView === item.id ? {...styles.menuItem, ...styles.menuItemActive} : styles.menuItem} 
-            onClick={() => handleMenuClick(item.id)}
-          >
-            {item.title}
-          </button>
+          <div key={item.id} style={{...styles.menuItemContainer, ...(activeView === item.id ? styles.menuItemActive : {})}}>
+            <button 
+              style={styles.menuItemButton} 
+              onClick={() => handleMenuClick(item.id)}
+            >
+              {item.icon}
+              <span style={styles.menuItemText}>{item.title}</span>
+            </button>
+            {user && (
+              <button onClick={() => handleSetHomepage(item.id)} style={styles.homepageButton}>
+                {homepage === item.id ? <HomeIconSolid style={styles.menuIcon} /> : <HomeIcon style={styles.menuIcon} />}
+              </button>
+            )}
+          </div>
         ))}
       </div>
       
@@ -106,9 +154,24 @@ const App = () => {
             </button>
             <h1 style={styles.headerTitle}>Ticari Hesaplayıcı</h1>
         </div>
-        <Auth user={user} styles={styles} />
+        <div style={styles.headerRight}>
+          <Auth 
+            user={user} 
+            styles={styles} 
+            onHistoryClick={() => setIsHistoryOpen(true)}
+          />
+        </div>
       </div>
       
+      {isHistoryOpen && (
+        <History 
+          user={user} 
+          styles={styles} 
+          onClose={() => setIsHistoryOpen(false)} 
+          onCalculationSelect={handleCalculationSelect}
+        />
+      )}
+
       <div style={styles.container}>
         {renderActiveView()}
       </div>

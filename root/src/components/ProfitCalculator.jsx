@@ -1,95 +1,75 @@
 // =================================================================
-// DOSYA: src/components/ProfitCalculator.js
-// AÇIKLAMA: Kâr/Zarar hesaplayıcı component'i. Firestore entegrasyonu eklendi.
+// DOSYA: root/src/components/ProfitCalculator.js (GÜNCELLENDİ)
+// AÇIKLAMA: Güncellenmiş saveCalculation fonksiyonu kullanıldı.
 // =================================================================
 import React, { useState, useEffect, useRef } from 'react';
-import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { saveCalculation } from '../firebaseConfig';
 
-const ProfitCalculator = ({ styles, user, calculation, history }) => {
+const ProfitCalculator = ({ styles, calculation, user }) => {
   const [alisFiyati, setAlisFiyati] = useState('');
   const [satisFiyati, setSatisFiyati] = useState('');
-  const [kdvOrani, setKdvOrani] = useState('20');
+  const [adet, setAdet] = useState('1');
+  const [kdvOrani, setKdvOrani] = useState('0');
   const [sonucTutar, setSonucTutar] = useState(0);
   const [sonucOran, setSonucOran] = useState(0);
+  const [toplamSonucTutar, setToplamSonucTutar] = useState(0);
 
-  const db = getFirestore();
   const timeoutRef = useRef(null);
 
-  // Geçmişten bir hesaplama seçildiğinde verileri yükle
   useEffect(() => {
-    if (calculation && calculation.type === 'profit') {
+    if (calculation && calculation.title === 'Kâr/Zarar Hesaplama') {
       setAlisFiyati(calculation.inputs.alisFiyati !== undefined ? calculation.inputs.alisFiyati : '');
       setSatisFiyati(calculation.inputs.satisFiyati !== undefined ? calculation.inputs.satisFiyati : '');
-      setKdvOrani(calculation.inputs.kdvOrani !== undefined ? calculation.inputs.kdvOrani : '20');
+      setAdet(calculation.inputs.adet !== undefined ? calculation.inputs.adet : '1');
+      setKdvOrani(calculation.inputs.kdvOrani !== undefined ? calculation.inputs.kdvOrani : '0');
     }
   }, [calculation]);
 
-  // Hesaplama yap ve sonucu state'e yaz
   useEffect(() => {
     const alis = parseFloat(alisFiyati) || 0;
     const satis = parseFloat(satisFiyati) || 0;
     const kdv = parseFloat(kdvOrani) || 0;
+    const miktar = parseInt(adet, 10) || 1;
+
     if (alis > 0) {
       const satisKdvHaric = satis / (1 + kdv / 100);
       const tutar = satisKdvHaric - alis;
       const oran = (tutar / alis) * 100;
       setSonucTutar(tutar);
       setSonucOran(oran);
+      setToplamSonucTutar(tutar * miktar);
     } else {
       setSonucTutar(0);
       setSonucOran(0);
+      setToplamSonucTutar(0);
     }
-  }, [alisFiyati, satisFiyati, kdvOrani]);
-    
-  // Kullanıcı yazmayı bıraktıktan 3 saniye sonra veriyi kaydet
-  useEffect(() => {
+
     clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(async () => {
-      const isAlisFiyatiValid = alisFiyati !== '' && !isNaN(parseFloat(alisFiyati));
-      const isSatisFiyatiValid = satisFiyati !== '' && !isNaN(parseFloat(satisFiyati));
-
-      if (user && isAlisFiyatiValid && isSatisFiyatiValid) {
-        const currentInputs = {
-          alisFiyati,
-          satisFiyati,
-          kdvOrani,
-        };
-
-        // Mevcut girdilerle aynı olan eski bir kaydı bul
-        const existingCalc = history?.find(
-          (h) =>
-            h.type === 'profit' &&
-            JSON.stringify(h.inputs) === JSON.stringify(currentInputs)
-        );
-
-        // Eğer varsa, eski kaydı sil
-        if (existingCalc) {
-          const oldDocRef = doc(db, `calculations/${user.uid}/items`, existingCalc.id);
-          await deleteDoc(oldDocRef);
-        }
-        
-        const calculationData = {
-          type: 'profit',
-          timestamp: serverTimestamp(),
-          inputs: currentInputs,
-          results: {
-            sonucTutar,
-            sonucOran,
-          }
-        };
-        const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const docRef = doc(db, `calculations/${user.uid}/items`, docId);
-        await setDoc(docRef, calculationData);
+    timeoutRef.current = setTimeout(() => {
+      if (user && user.uid && alis > 0 && satis > 0) {
+        saveCalculation(user.uid, {
+          title: 'Kâr/Zarar Hesaplama',
+          inputs: {
+            alisFiyati,
+            satisFiyati,
+            adet,
+            kdvOrani,
+          },
+          outputs: {
+            'Birim Başına Net Kâr/Zarar': `${sonucTutar.toFixed(2)} ₺`,
+            'Birim Başına Net Kâr/Zarar Oranı': `${sonucOran.toFixed(2)} %`,
+            'Toplam Net Kâr/Zarar Tutarı': `${toplamSonucTutar.toFixed(2)} ₺`,
+          },
+        });
       }
     }, 3000);
 
     return () => clearTimeout(timeoutRef.current);
-  }, [alisFiyati, satisFiyati, kdvOrani, sonucTutar, sonucOran, user, db, history]);
+  }, [alisFiyati, satisFiyati, kdvOrani, adet, user, sonucTutar, sonucOran, toplamSonucTutar]);
 
-
-  const getResultColor = () => {
-    if (sonucTutar > 0) return '#28a745';
-    if (sonucTutar < 0) return '#dc3545';
+  const getResultColor = (value) => {
+    if (value > 0) return '#28a745';
+    if (value < 0) return '#dc3545';
     return styles.resultValue.color;
   };
 
@@ -100,15 +80,22 @@ const ProfitCalculator = ({ styles, user, calculation, history }) => {
       <input style={styles.input} type="number" placeholder="Örn: 100" value={alisFiyati} onChange={(e) => setAlisFiyati(e.target.value)} />
       <p style={styles.label}>Satış Fiyatı (KDV Dahil) (₺)</p>
       <input style={styles.input} type="number" placeholder="Örn: 150" value={satisFiyati} onChange={(e) => setSatisFiyati(e.target.value)} />
+      <p style={styles.label}>Adet</p>
+      <input style={styles.input} type="number" placeholder="Örn: 1" value={adet} onChange={(e) => setAdet(e.target.value)} />
       <p style={styles.label}>KDV Oranı (%)</p>
       <input style={styles.input} type="number" placeholder="Örn: 20" value={kdvOrani} onChange={(e) => setKdvOrani(e.target.value)} />
-      <div style={{...styles.resultContainer, margin: '8px auto 0 auto'}}>
-          <p style={styles.resultLabel}>Net Kâr/Zarar Tutarı:</p>
-          <p style={{ ...styles.resultValue, color: getResultColor() }}>{sonucTutar.toFixed(2).replace('.',',')} ₺</p>
+      
+      <div style={{...styles.resultContainer, margin: '8px auto 0 auto', paddingTop: '10px'}}>
+          <p style={styles.resultLabel}>Birim Başına Net Kâr/Zarar:</p>
+          <p style={{ ...styles.resultValue, color: getResultColor(sonucTutar) }}>{sonucTutar.toFixed(2).replace('.',',')} ₺</p>
       </div>
       <div style={{...styles.resultContainer, margin: '8px auto'}}>
-          <p style={styles.resultLabel}>Net Kâr/Zarar Oranı:</p>
-          <p style={{ ...styles.resultValue, color: getResultColor() }}>{sonucOran.toFixed(2).replace('.',',')} %</p>
+          <p style={styles.resultLabel}>Birim Başına Net Kâr/Zarar Oranı:</p>
+          <p style={{ ...styles.resultValue, color: getResultColor(sonucOran) }}>{sonucOran.toFixed(2).replace('.',',')} %</p>
+      </div>
+      <div style={{...styles.resultContainer, ...styles.highlightedResult}}>
+          <p style={{...styles.highlightedResultLabel, fontWeight: 'bold'}}>Toplam Net Kâr/Zarar Tutarı ({adet} adet):</p>
+          <p style={{ ...styles.highlightedResultValue, color: getResultColor(toplamSonucTutar), fontWeight: 'bold' }}>{toplamSonucTutar.toFixed(2).replace('.',',')} ₺</p>
       </div>
     </div>
   );

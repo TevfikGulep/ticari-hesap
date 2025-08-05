@@ -11,6 +11,6 @@
     }
   },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "root/firestore.rules"
   }
 }
