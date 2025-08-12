@@ -116,7 +116,7 @@ const MarketplaceCalculator = ({ styles, calculation, user }) => {
       <input style={styles.input} type="number" placeholder="Örn: 5" value={paketleme} onChange={(e) => setPaketleme(e.target.value)} />
       <p style={styles.label}>Reklam Gideri (Ürün başı) (Opsiyonel) (₺)</p>
       <input style={styles.input} type="number" placeholder="Örn: 12" value={reklam} onChange={(e) => setReklam(e.target.value)} />
-      <p style={styles.label}>İade Oranı (%)</p>
+      <p style={styles.label}>Ürün İade Edilme Oranı (%)</p>
       <input style={styles.input} type="number" placeholder="Örn: 5" value={iadeOrani} onChange={(e) => setIadeOrani(e.target.value)} />
       <p style={styles.label}>Pazaryeri Komisyon Oranı (%)</p>
       <input style={styles.input} type="number" value={komisyon} onChange={(e) => setKomisyon(e.target.value)} />

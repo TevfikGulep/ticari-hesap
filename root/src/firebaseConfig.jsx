@@ -1,10 +1,23 @@
 // =================================================================
 // DOSYA: root/src/firebaseConfig.js (GÜNCELLENDİ)
-// AÇIKLAMA: Firebase başlatma, servisler ve kaydetme/silme/temizleme fonksiyonları eklendi.
+// AÇIKLAMA: Firestore başlatma metodu, önerilen yeni `initializeFirestore`
+//            metoduyla güncellendi ve çevrimdışı destek entegre edildi.
 // =================================================================
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, doc, deleteDoc, serverTimestamp, query, where, getDocs, updateDoc } from "firebase/firestore";
+import { 
+  initializeFirestore, 
+  persistentLocalCache, 
+  collection, 
+  addDoc, 
+  doc, 
+  deleteDoc, 
+  serverTimestamp, 
+  query, 
+  where, 
+  getDocs, 
+  updateDoc 
+} from "firebase/firestore";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBFEu6vz_Xwqeo-sFnpNaM1K6uHETRys8A",
@@ -19,9 +32,14 @@ export const firebaseConfig = {
 // Firebase'i başlat
 const app = initializeApp(firebaseConfig);
 
-// Servisleri başlat ve dışa aktar
+// Servisleri başlat
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Firestore'u çevrimdışı kalıcılıkla başlat (yeni ve önerilen yöntem)
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({})
+});
+
 
 // Hesaplama geçmişini Firestore'a kaydetme fonksiyonu
 export const saveCalculation = async (userId, data) => {

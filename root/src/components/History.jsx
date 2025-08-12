@@ -1,8 +1,8 @@
 // =================================================================
 // DOSYA: root/src/components/History.jsx (GÜNCELLENDİ)
-// AÇIKLAMA: "Geçmişi Temizle" butonu ve onay diyaloğu eklendi.
+// AÇIKLAMA: Dışarı tıklandığında kapanma özelliği eklendi.
 // =================================================================
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { auth, db, clearHistory, updateCalculation } from '../firebaseConfig';
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
@@ -12,7 +12,24 @@ const History = ({ user, styles, onClose, onCalculationSelect }) => {
   const [editingId, setEditingId] = useState(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedNote, setEditedNote] = useState('');
+  const historyPanelRef = useRef(null); // Sidebar paneli için ref
 
+  // Dışarıya tıklandığında sidebar'ı kapatma
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (historyPanelRef.current && !historyPanelRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    // Olay dinleyicisini ekle
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Komponent kaldırıldığında olay dinleyicisini temizle
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   useEffect(() => {
     if (user) {
@@ -65,7 +82,6 @@ const History = ({ user, styles, onClose, onCalculationSelect }) => {
     handleCancelEdit();
   };
 
-
   const renderSummary = (calc) => {
     if (calc.customTitle) {
       return calc.customTitle;
@@ -94,7 +110,7 @@ const History = ({ user, styles, onClose, onCalculationSelect }) => {
   }
 
   return (
-    <div style={styles.historyPanel}>
+    <div style={styles.historyPanel} ref={historyPanelRef}>
       <div style={styles.historyHeader}>
         <h2 style={styles.historyTitle}>Geçmiş Hesaplamalar</h2>
         <button style={styles.closeButton} onClick={onClose}>
