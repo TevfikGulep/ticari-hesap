@@ -6,11 +6,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0', // Listen on all network interfaces
-    port: 9002,
+    port: 9002,      // The port Vite runs on inside the container
     hmr: {
+      // Let the client infer the host from the browser's location,
+      // but explicitly tell it to use the secure protocol and standard HTTPS port.
       protocol: 'wss',
-      host: '9000-firebase-hesaplayicigit-1754034725473.cluster-ombtxv25tbd6yrjpp3lukp6zhc.cloudworkstations.dev',
-      clientPort: 443, // Use 443 for WebSocket connections over HTTPS in the browser
-    },
-  },
+      clientPort: 443
+    }
+  }
 })
