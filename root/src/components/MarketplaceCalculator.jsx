@@ -141,6 +141,7 @@ const MarketplaceCalculator = ({ styles, calculation, user }) => {
           <p style={styles.resultLabel}>Pazaryerine Ödenen Komisyon:</p>
           <p style={styles.resultValue}>{komisyonTutari.toFixed(2).replace('.',',')} ₺</p>
       </div>
+      <p style={{...styles.label, marginTop: '20px', fontStyle: 'italic', color: '#555'}}>Giriş yaptığınızda geçmiş işlemlerinizi görebilir ve daha fazla özelliğe erişebilirsiniz. Tamamen Ücretsiz.</p>
     </div>
   );
 };

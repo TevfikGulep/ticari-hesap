@@ -55,6 +55,7 @@ const SalesPriceCalculator = ({ styles, calculation, user }) => {
           <p style={styles.highlightedResultLabel}>Olması Gereken Satış Fiyatı:</p>
           <p style={styles.highlightedResultValue}>{sonucSatisFiyati.toFixed(2).replace('.',',')} ₺</p>
       </div>
+      <p style={{...styles.label, marginTop: '20px', fontStyle: 'italic', color: '#555'}}>Giriş yaptığınızda geçmiş işlemlerinizi görebilir ve daha fazla özelliğe erişebilirsiniz. Tamamen Ücretsiz.</p>
     </div>
   );
 };

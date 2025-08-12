@@ -245,6 +245,7 @@ const SalaryCalculator = ({ styles, calculation, user }) => {
           </table>
         </div>
       )}
+      <p style={{...styles.label, marginTop: '20px', fontStyle: 'italic', color: '#555'}}>Giriş yaptığınızda geçmiş işlemlerinizi görebilir ve daha fazla özelliğe erişebilirsiniz. Tamamen Ücretsiz.</p>
     </div>
   );
 };
