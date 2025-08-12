@@ -2,6 +2,7 @@
 // DOSYA: root/src/firebaseConfig.js (GÜNCELLENDİ)
 // AÇIKLAMA: Firestore başlatma metodu, önerilen yeni `initializeFirestore`
 //            metoduyla güncellendi ve çevrimdışı destek entegre edildi.
+//            Hassas bilgiler .env dosyasından okunuyor.
 // =================================================================
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -19,14 +20,16 @@ import {
   updateDoc 
 } from "firebase/firestore";
 
-export const firebaseConfig = {
-  apiKey: "AIzaSyBFEu6vz_Xwqeo-sFnpNaM1K6uHETRys8A",
-  authDomain: "ticari-hesap.firebaseapp.com",
-  projectId: "ticari-hesap",
-  storageBucket: "ticari-hesap.firebasestorage.app",
-  messagingSenderId: "245188905205",
-  appId: "1:245188905205:web:29d56c5b5412c9ff835dbc",
-  measurementId: "G-ERKGP1BH2H"
+// Vite, .env.local dosyasındaki VITE_ ile başlayan değişkenleri
+// import.meta.env objesine otomatik olarak yükler.
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
 // Firebase'i başlat
