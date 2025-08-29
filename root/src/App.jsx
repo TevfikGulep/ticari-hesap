@@ -208,7 +208,7 @@ const App = () => {
         />
       )}
 
-      <div style={{...styles.container, paddingTop: '100px'}}>
+      <div style={{...styles.container, paddingTop: '115px'}}>
         {renderActiveView()}
       </div>
     </div>
