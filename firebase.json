@@ -8,12 +8,17 @@
     ],
     "frameworksBackend": {
       "region": "europe-west1"
-    }
-  },
-  "firestore": {
-    "rules": "root/firestore.rules"
-  },
-  "functions": {
-    "source": "root/functions"
+    },
+    "headers": [
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      }
+    ]
   }
 }
