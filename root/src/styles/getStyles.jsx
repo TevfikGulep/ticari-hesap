@@ -78,6 +78,26 @@ const getStyles = (theme) => {
     historyItemTimestamp: { fontSize: '10px', color: colors.label, marginTop: '5px' },
     historyFooter: { padding: '20px', borderTop: `1px solid ${colors.inputBorder}` },
     logoutButton: { backgroundColor: colors.danger, color: 'white', border: 'none', borderRadius: '6px', padding: '10px 16px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', width: '100%', textAlign: 'center' },
+
+    // Auth Incentive Styles
+    authIncentiveContainer: {
+      padding: '20px',
+      marginTop: '20px',
+      textAlign: 'center',
+      backgroundColor: isLight ? '#f0f8ff' : '#2a2a2a',
+      borderRadius: '8px',
+      margin: '0 10px',
+      boxShadow: `0 2px 8px rgba(0, 0, 0, ${isLight ? 0.05 : 0.2})`,
+    },
+    authIncentiveText: {
+      fontSize: '14px',
+      color: isLight ? '#3b82f6' : '#91d5ff',
+      marginBottom: '15px',
+      lineHeight: '1.5',
+      fontWeight: '500'
+    },
+    // Sidebar içindeki Google giriş butonu için özel stil ayarlaması
+    authButton: { width: '100%', justifyContent: 'center' },
   };
 };
 

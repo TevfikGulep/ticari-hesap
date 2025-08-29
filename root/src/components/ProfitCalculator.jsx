@@ -97,7 +97,6 @@ const ProfitCalculator = ({ styles, calculation, user }) => {
           <p style={{...styles.highlightedResultLabel, fontWeight: 'bold'}}>Toplam Net Kâr/Zarar Tutarı ({adet} adet):</p>
           <p style={{ ...styles.highlightedResultValue, color: getResultColor(toplamSonucTutar), fontWeight: 'bold' }}>{toplamSonucTutar.toFixed(2).replace('.',',')} ₺</p>
       </div>
-      <p style={{...styles.label, marginTop: '20px', fontStyle: 'italic', color: '#555'}}>Giriş yaptığınızda geçmiş işlemlerinizi görebilir ve daha fazla özelliğe erişebilirsiniz. Tamamen Ücretsiz.</p>
     </div>
   );
 };
