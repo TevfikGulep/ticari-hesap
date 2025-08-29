@@ -1,0 +1,35 @@
+.currency-container {
+    position: fixed; /* Sayfada sabit kalmasını sağlar */
+    top: 60px; /* 60px yüksekliğindeki header'ın hemen altına yerleştirir */
+    left: 0;
+    right: 0;
+    z-index: 999; /* Header'ın arkasında, içeriğin önünde kalır */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+    background-color: #f7f9fc;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.currency-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.currency-flag {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.currency-value {
+    font-weight: 600;
+    color: #0056b3;
+}

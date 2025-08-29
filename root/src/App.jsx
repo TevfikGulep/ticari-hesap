@@ -18,6 +18,7 @@ import SalesPriceCalculator from './components/SalesPriceCalculator';
 import MarketplaceCalculator from './components/MarketplaceCalculator';
 import SalaryCalculator from '././components/SalaryCalculator';
 import Placeholder from './components/Placeholder';
+import CurrencyDisplay from './components/CurrencyDisplay';
 
 const GoogleIcon = ({ style }) => (
   <svg style={style} viewBox="0 0 48 48" fill="white">
@@ -196,6 +197,8 @@ const App = () => {
         </div>
       </div>
       
+      <CurrencyDisplay />
+
       {isHistoryOpen && (
         <History 
           user={user} 
@@ -205,7 +208,7 @@ const App = () => {
         />
       )}
 
-      <div style={styles.container}>
+      <div style={{...styles.container, paddingTop: '100px'}}>
         {renderActiveView()}
       </div>
     </div>

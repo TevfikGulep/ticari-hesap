@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "ticari-hesap"
-  }
+    "default": "ticari-hesap",
+    "ticari-hesap": "ticari-hesap"
+  },
+  "targets": {},
+  "etags": {}
 }

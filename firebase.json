@@ -12,5 +12,8 @@
   },
   "firestore": {
     "rules": "root/firestore.rules"
+  },
+  "functions": {
+    "source": "root/functions"
   }
 }

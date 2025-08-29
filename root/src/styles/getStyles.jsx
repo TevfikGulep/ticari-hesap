@@ -22,6 +22,9 @@ const getStyles = (theme) => {
     authButtonText: '#ffffff',
     danger: isLight ? '#dc2626' : '#f87171',
     dangerHover: isLight ? '#b91c1c' : '#ef4444',
+    currencyBarBg: isLight ? '#2d3748' : '#0a0a0a',
+    currencyText: '#ffffff',
+    lastUpdatedText: '#cccccc',
   };
 
   return {
@@ -98,6 +101,40 @@ const getStyles = (theme) => {
     },
     // Sidebar içindeki Google giriş butonu için özel stil ayarlaması
     authButton: { width: '100%', justifyContent: 'center' },
+
+    // Currency Bar Styles
+    currencyBar: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.currencyBarBg,
+      color: colors.currencyText,
+      padding: '5px 20px',
+      textAlign: 'center',
+      fontSize: '14px',
+      zIndex: 1001,
+      boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.05 : 0.3})`,
+    },
+    currencyText: {
+      margin: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '5px',
+    },
+    lastUpdatedText: {
+      fontSize: '12px',
+      marginLeft: '10px',
+      color: colors.lastUpdatedText,
+    },
+    // Adjust header and container padding to account for the currency bar
+    // header needs to be 60px from the top of the currency bar
+    // container needs to be 60px + currencyBar height (which is dynamic, but approx 30px) from top.
+    // Let's adjust header to be top: 30px and container to be paddingTop: 90px for now.
+    // The header height is 60px. So currencyBar height is approximately 30px.
+    // Total height taken by currencyBar + header = 30px + 60px = 90px.
+    // So content needs padding-top: 90px.
   };
 };
 

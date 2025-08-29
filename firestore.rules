@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Bu kural, kimliği doğrulanmamış kullanıcıların bile 'rates' koleksiyonundaki
+    // 'latest' belgesini okumasına izin verir. Kur bilgilerinin herkes tarafından
+    // görülebilmesi için bu gereklidir.
+    match /rates/latest {
+      allow read: if true;
+      allow write: if false; // Kur verilerini sadece yönetici paneli veya güvenli bir sunucu güncelleyebilmelidir.
+    }
+
+    // Bu kural, bir kullanıcının yalnızca kendi belgelerine erişebilmesini sağlar.
+    // Kullanıcıların hesap geçmişi ve ayarları gibi özel verilerini korur.
+    match /users/{userId}/{documents=**} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
