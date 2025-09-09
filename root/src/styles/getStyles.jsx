@@ -25,6 +25,8 @@ const getStyles = (theme) => {
     currencyBarBg: isLight ? '#2d3748' : '#0a0a0a',
     currencyText: '#ffffff',
     lastUpdatedText: '#cccccc',
+    primaryButtonBg: '#3b82f6',
+    primaryButtonHoverBg: '#2563eb',
   };
 
   return {
@@ -49,7 +51,7 @@ const getStyles = (theme) => {
     cardTitle: { fontSize: 20, fontWeight: '600', color: colors.cardTitle, marginBottom: 16 },
     label: { fontSize: 14, color: colors.label, marginBottom: 8 },
     input: { backgroundColor: colors.inputBg, borderRadius: 8, padding: '12px 16px', fontSize: 16, color: colors.inputText, marginBottom: 16, border: `1px solid ${colors.inputBorder}`, width: '100%', boxSizing: 'border-box' },
-    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginTop: 8, marginBottom: '8px', margin: 'auto' },
+    resultContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.resultBg, padding: '16px', borderRadius: 8, marginTop: '8px', marginBottom: '8px', margin: 'auto', paddingTop: '10px'},
     resultLabel: { fontSize: 16, color: colors.resultLabel },
     resultValue: { fontSize: 20, fontWeight: 'bold', color: colors.text },
     highlightedResult: { backgroundColor: isLight ? '#e6f7ff' : '#032f4a', border: `1px solid ${isLight ? '#91d5ff' : '#054569'}`, marginBottom: '8px' },
@@ -135,6 +137,24 @@ const getStyles = (theme) => {
     // The header height is 60px. So currencyBar height is approximately 30px.
     // Total height taken by currencyBar + header = 30px + 60px = 90px.
     // So content needs padding-top: 90px.
+
+    // Primary Button Styles
+    buttonPrimary: {
+      backgroundColor: colors.primaryButtonBg,
+      color: colors.authButtonText,
+      padding: '10px 20px',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '16px',
+      fontWeight: '500',
+      marginTop: '16px',
+      boxShadow: `0 2px 4px rgba(0, 0, 0, ${isLight ? 0.1 : 0.3})`,
+      transition: 'background-color 0.2s ease-in-out',
+      '&:hover': {
+        backgroundColor: colors.primaryButtonHoverBg,
+      },
+    },
   };
 };
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { register } from './serviceWorkerRegistration';
+// import { register } from './serviceWorkerRegistration';
 
 const root = createRoot(document.getElementById('root'));
 root.render(
@@ -11,5 +11,5 @@ root.render(
   </React.StrictMode>
 );
 
-// Service Worker'ı kaydet ve çevrimdışı modu etkinleştir
-register();
+// Service Worker'ı geliştirme sırasında devre dışı bırak
+// register();
