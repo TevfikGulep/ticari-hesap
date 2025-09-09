@@ -112,11 +112,11 @@ const OptionPriceCalculator = ({ styles }) => {
       </div>
 
       <div style={{marginTop: '16px'}}>
-        <div style={{styles.resultContainer, margin: '8px auto 0 auto', paddingTop: '10px'}}>
+        <div style={{...styles.resultContainer, margin: '8px auto 0 auto', paddingTop: '10px'}}>
             <p style={styles.resultLabel}>Opsiyon Fiyatındaki Toplam Değişim:</p>
             <p style={styles.resultValue}>{optionPriceChangeAmount.toFixed(2)} ₺</p>
         </div>
-        <div style={{styles.resultContainer, margin: '8px auto 0 auto'}}>
+        <div style={{...styles.resultContainer, margin: '8px auto 0 auto'}}>
             <p style={styles.resultLabel}>Opsiyon Fiyatındaki Yüzdesel Değişim:</p>
             <p style={styles.resultValue}>%{optionChangePercent.toFixed(2)}</p>
         </div>
