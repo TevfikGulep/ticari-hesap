@@ -7,11 +7,14 @@ const OptionPriceCalculator = ({ styles }) => {
   const [gamma, setGamma] = useState('');
   const [stockChangePercent, setStockChangePercent] = useState('');
   const [shareCount, setShareCount] = useState('1');
+  const [spread, setSpread] = useState(''); // State for the bid-ask spread
   
-  // Initialize results with 0, similar to other calculators
+  // Initialize results with 0
   const [optionPriceChangeAmount, setOptionPriceChangeAmount] = useState(0);
   const [optionChangePercent, setOptionChangePercent] = useState(0);
   const [newOptionPrice, setNewOptionPrice] = useState(0);
+  const [newBidPrice, setNewBidPrice] = useState(0); // State for the new bid price
+  const [newAskPrice, setNewAskPrice] = useState(0); // State for the new ask price
 
   useEffect(() => {
     const S = parseFloat(stockPrice) || 0;
@@ -20,6 +23,7 @@ const OptionPriceCalculator = ({ styles }) => {
     const G = parseFloat(gamma) || 0;
     const SCP = parseFloat(stockChangePercent) || 0;
     const SC = parseInt(shareCount, 10) || 1;
+    const SP = parseFloat(spread) || 0; // Parse the spread, default to 0
 
     if (S > 0 && P > 0) {
       const stockPriceChangeAmount = S * (SCP / 100);
@@ -30,20 +34,28 @@ const OptionPriceCalculator = ({ styles }) => {
       }
       
       const finalOptPriceChange = optPriceChangeAmount * SC;
-      const newOptPrice = P + finalOptPriceChange;
+      const newMidPrice = P + finalOptPriceChange; // This is the new mid-price
       const optChangePercent = (finalOptPriceChange / (P * SC)) * 100;
+
+      // Calculate new bid and ask prices based on the spread
+      const newBid = newMidPrice - (SP / 2);
+      const newAsk = newMidPrice + (SP / 2);
 
       setOptionPriceChangeAmount(finalOptPriceChange);
       setOptionChangePercent(isNaN(optChangePercent) ? 0 : optChangePercent);
-      setNewOptionPrice(newOptPrice);
+      setNewOptionPrice(newMidPrice);
+      setNewBidPrice(newBid);
+      setNewAskPrice(newAsk);
 
     } else {
       // Reset to 0 if core inputs are missing
       setOptionPriceChangeAmount(0);
       setOptionChangePercent(0);
       setNewOptionPrice(0);
+      setNewBidPrice(0);
+      setNewAskPrice(0);
     }
-  }, [stockPrice, premiumPrice, delta, gamma, stockChangePercent, shareCount]);
+  }, [stockPrice, premiumPrice, delta, gamma, stockChangePercent, shareCount, spread]);
 
   return (
     <div style={styles.card}>
@@ -109,6 +121,17 @@ const OptionPriceCalculator = ({ styles }) => {
             placeholder="Örn: 100"
           />
         </div>
+        {/* New Input for Spread */}
+        <div className="md:col-span-2">
+          <label style={styles.label}>Alış-Satış Farkı (Opsiyonel)</label>
+          <input
+            type="number"
+            value={spread}
+            onChange={(e) => setSpread(e.target.value)}
+            style={styles.input}
+            placeholder="Örn: 0.10"
+          />
+        </div>
       </div>
 
       <div style={{marginTop: '16px'}}>
@@ -121,9 +144,22 @@ const OptionPriceCalculator = ({ styles }) => {
             <p style={styles.resultValue}>%{optionChangePercent.toFixed(2)}</p>
         </div>
         <div style={{...styles.resultContainer, ...styles.highlightedResult, margin: '8px auto 0 auto'}}>
-            <p style={styles.highlightedResultLabel}>Yeni Opsiyon Fiyatı:</p>
+            <p style={styles.highlightedResultLabel}>Yeni Opsiyon Fiyatı (Orta):</p>
             <p style={styles.highlightedResultValue}>{newOptionPrice.toFixed(2)} ₺</p>
         </div>
+        {/* Display new Bid and Ask prices if spread is entered */}
+        {spread && (
+          <>
+            <div style={{...styles.resultContainer, margin: '8px auto 0 auto'}}>
+                <p style={styles.resultLabel}>Yeni Alış Fiyatı (Bid):</p>
+                <p style={styles.resultValue}>{newBidPrice.toFixed(2)} ₺</p>
+            </div>
+            <div style={{...styles.resultContainer, margin: '8px auto 0 auto'}}>
+                <p style={styles.resultLabel}>Yeni Satış Fiyatı (Ask):</p>
+                <p style={styles.resultValue}>{newAskPrice.toFixed(2)} ₺</p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
