@@ -14,8 +14,6 @@ const ProfitCalculator = ({ styles, calculation, user }) => {
   const [sonucOran, setSonucOran] = useState(0);
   const [toplamSonucTutar, setToplamSonucTutar] = useState(0);
 
-  const timeoutRef = useRef(null);
-
   useEffect(() => {
     if (calculation && calculation.title === 'Kâr/Zarar Hesaplama') {
       setAlisFiyati(calculation.inputs.alisFiyati !== undefined ? calculation.inputs.alisFiyati : '');
@@ -38,14 +36,7 @@ const ProfitCalculator = ({ styles, calculation, user }) => {
       setSonucTutar(tutar);
       setSonucOran(oran);
       setToplamSonucTutar(tutar * miktar);
-    } else {
-      setSonucTutar(0);
-      setSonucOran(0);
-      setToplamSonucTutar(0);
-    }
 
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
       if (user && user.uid && alis > 0 && satis > 0) {
         saveCalculation(user.uid, {
           title: 'Kâr/Zarar Hesaplama',
@@ -56,16 +47,18 @@ const ProfitCalculator = ({ styles, calculation, user }) => {
             kdvOrani,
           },
           outputs: {
-            'Birim Başına Net Kâr/Zarar': `${sonucTutar.toFixed(2)} ₺`,
-            'Birim Başına Net Kâr/Zarar Oranı': `${sonucOran.toFixed(2)} %`,
-            'Toplam Net Kâr/Zarar Tutarı': `${toplamSonucTutar.toFixed(2)} ₺`,
+            'Birim Başına Net Kâr/Zarar': `${tutar.toFixed(2)} ₺`,
+            'Birim Başına Net Kâr/Zarar Oranı': `${oran.toFixed(2)} %`,
+            'Toplam Net Kâr/Zarar Tutarı': `${(tutar * miktar).toFixed(2)} ₺`,
           },
         });
       }
-    }, 3000);
-
-    return () => clearTimeout(timeoutRef.current);
-  }, [alisFiyati, satisFiyati, kdvOrani, adet, user, sonucTutar, sonucOran, toplamSonucTutar]);
+    } else {
+      setSonucTutar(0);
+      setSonucOran(0);
+      setToplamSonucTutar(0);
+    }
+  }, [alisFiyati, satisFiyati, kdvOrani, adet, user]);
 
   const getResultColor = (value) => {
     if (value > 0) return '#28a745';
@@ -87,15 +80,15 @@ const ProfitCalculator = ({ styles, calculation, user }) => {
       
       <div style={{...styles.resultContainer, margin: '8px auto 0 auto', paddingTop: '10px'}}>
           <p style={styles.resultLabel}>Birim Başına Net Kâr/Zarar:</p>
-          <p style={{ ...styles.resultValue, color: getResultColor(sonucTutar) }}>{sonucTutar.toFixed(2).replace('.',',')} ₺</p>
+          <p style={{ ...styles.resultValue, color: getResultColor(sonucTutar) }}>{sonucTutar.toFixed(2).replace('.','.')} ₺</p>
       </div>
       <div style={{...styles.resultContainer, margin: '8px auto'}}>
           <p style={styles.resultLabel}>Birim Başına Net Kâr/Zarar Oranı:</p>
-          <p style={{ ...styles.resultValue, color: getResultColor(sonucOran) }}>{sonucOran.toFixed(2).replace('.',',')} %</p>
+          <p style={{ ...styles.resultValue, color: getResultColor(sonucOran) }}>{sonucOran.toFixed(2).replace('.','.')} %</p>
       </div>
       <div style={{...styles.resultContainer, ...styles.highlightedResult}}>
           <p style={{...styles.highlightedResultLabel, fontWeight: 'bold'}}>Toplam Net Kâr/Zarar Tutarı ({adet} adet):</p>
-          <p style={{ ...styles.highlightedResultValue, color: getResultColor(toplamSonucTutar), fontWeight: 'bold' }}>{toplamSonucTutar.toFixed(2).replace('.',',')} ₺</p>
+          <p style={{ ...styles.highlightedResultValue, color: getResultColor(toplamSonucTutar), fontWeight: 'bold' }}>{toplamSonucTutar.toFixed(2).replace('.','.')} ₺</p>
       </div>
     </div>
   );

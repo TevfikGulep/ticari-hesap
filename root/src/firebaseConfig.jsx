@@ -19,6 +19,7 @@ import {
   getDocs, 
   updateDoc 
 } from "firebase/firestore";
+import { debounce } from './utils/debounce';
 
 // Vite, .env.local dosyasındaki VITE_ ile başlayan değişkenleri
 // import.meta.env objesine otomatik olarak yükler.
@@ -46,7 +47,7 @@ export const db = initializeFirestore(app, {
 
 
 // Hesaplama geçmişini Firestore'a kaydetme fonksiyonu
-export const saveCalculation = async (userId, data) => {
+const saveCalculationFn = async (userId, data) => {
   if (!userId) return;
   try {
     const calcCollection = collection(db, "users", userId, "calculations");
@@ -72,9 +73,13 @@ export const saveCalculation = async (userId, data) => {
       });
     }
   } catch (error) {
-    console.error("Error saving calculation: ", error);
+    if (error.name !== 'AbortError') {
+      console.error("Error saving calculation: ", error);
+    }
   }
 };
+
+export const saveCalculation = debounce(saveCalculationFn, 3000);
 
 // Belirli bir hesaplama kaydını güncelleme fonksiyonu
 export const updateCalculation = async (userId, docId, newData) => {
