@@ -19,7 +19,6 @@ import MarketplaceCalculator from './components/MarketplaceCalculator';
 import SalaryCalculator from '././components/SalaryCalculator';
 import Placeholder from './components/Placeholder';
 import CurrencyDisplay from './components/CurrencyDisplay';
-import OptionPriceCalculator from './components/OptionPriceCalculator'; // Yeni import
 
 const GoogleIcon = ({ style }) => (
   <svg style={style} viewBox="0 0 48 48" fill="white">
@@ -99,7 +98,6 @@ const App = () => {
     { id: 'salesPriceCalculator', title: 'Satış Fiyatı Hesaplama' },
     { id: 'marketplaceCalculator', title: 'Pazaryeri Fiyat Hesaplama' },
     { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama' },
-    { id: 'optionPriceCalculator', title: 'Hisse Opsiyon Fiyat Hesaplama' }, // Yeni menü öğesi
     { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama' },
     { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama' },
   ];
@@ -116,7 +114,6 @@ const App = () => {
       'Satış Fiyatı Hesaplama': 'salesPriceCalculator',
       'Pazaryeri Fiyat Hesaplama': 'marketplaceCalculator',
       'Brüt/Net Maaş Hesaplama': 'salaryCalculator',
-      'Hisse Opsiyon Fiyat Hesaplama': 'optionPriceCalculator', // Yeni eşleme
     };
     const viewId = viewMap[calc.title];
     if (viewId) {
@@ -136,8 +133,6 @@ const App = () => {
         return <MarketplaceCalculator {...props} />;
       case 'salaryCalculator':
         return <SalaryCalculator {...props} />;
-      case 'optionPriceCalculator': // Yeni case
-        return <OptionPriceCalculator {...props} />;
       case 'expenseCalculator':
         return <Placeholder title="İşyeri Gider Hesaplama" styles={styles} />;
       case 'unitCostCalculator':
