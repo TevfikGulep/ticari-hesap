@@ -32,19 +32,31 @@ const History = ({ user, styles, onClose, onCalculationSelect }) => {
   }, [onClose]);
 
   useEffect(() => {
-    if (user) {
+    let unsubscribe;
+    if (user && user.uid) {
       const q = query(collection(db, "users", user.uid, "calculations"), orderBy("timestamp", "desc"));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
         const calculations = [];
         querySnapshot.forEach((doc) => {
           calculations.push({ id: doc.id, ...doc.data() });
         });
         setHistory(calculations);
         setLoading(false);
+      }, (error) => {
+          console.error("Firestore snapshot error:", error);
+          setLoading(false);
       });
-      return () => unsubscribe();
+    } else {
+        setLoading(false);
+        setHistory([]);
     }
-  }, [user]);
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [user?.uid]);
 
   const handleLogout = () => {
     auth.signOut();
