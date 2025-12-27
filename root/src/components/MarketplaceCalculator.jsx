@@ -52,7 +52,7 @@ const MarketplaceCalculator = ({ styles, calculation, user }) => {
 
     const reklamKdvHaric = pReklam / 1.20;
     const baseCost = pGelisFiyati + pPaketleme + reklamKdvHaric;
-    const returnCostPerItem = (iadeDecimal > 0 && iadeDecimal < 1) ? (iadeDecimal * (pKargo / 2)) / (1 - iadeDecimal) : 0;
+    const returnCostPerItem = (iadeDecimal > 0 && iadeDecimal < 1) ? (iadeDecimal * pKargo) / (1 - iadeDecimal) : 0;
     const inputVat = pGelisFiyati * kdvDecimal;
     const serviceVat = (pKargo + pPaketleme) * 0.20 + (pReklam - reklamKdvHaric);
     const totalDeductibleVat = inputVat + serviceVat;
