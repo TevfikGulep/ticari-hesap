@@ -19,6 +19,7 @@ import MarketplaceCalculator from './components/MarketplaceCalculator';
 import SalaryCalculator from '././components/SalaryCalculator';
 import Placeholder from './components/Placeholder';
 import CurrencyDisplay from './components/CurrencyDisplay';
+import RequestForm from './components/RequestForm'; // EKLENDİ
 
 const GoogleIcon = ({ style }) => (
   <svg style={style} viewBox="0 0 48 48" fill="white">
@@ -100,6 +101,7 @@ const App = () => {
     { id: 'salaryCalculator', title: 'Eleman Brüt/Net Maaş Hesaplama' },
     { id: 'expenseCalculator', title: 'İşyeri Gider Hesaplama' },
     { id: 'unitCostCalculator', title: 'Ürün Başı İşletme Maliyeti Hesaplama' },
+    { id: 'requestForm', title: 'İstek & Öneri' }, // EKLENDİ
   ];
   
   const handleMenuClick = (viewId) => {
@@ -137,6 +139,8 @@ const App = () => {
         return <Placeholder title="İşyeri Gider Hesaplama" styles={styles} />;
       case 'unitCostCalculator':
         return <Placeholder title="Ürün Başı İşletme Maliyeti Hesaplama" styles={styles} />;
+      case 'requestForm': // EKLENDİ
+        return <RequestForm {...props} />;
       default:
         return <ProfitCalculator {...props} />;
     }
